@@ -1,0 +1,9 @@
+{
+  "name": "Tavern DM",
+  "short_name": "Tavern",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#14110f",
+  "theme_color": "#1d1916",
+  "icons": [{"src": "/icon.png", "sizes": "256x256", "type": "image/png", "purpose": "any"}]
+}

@@ -1,0 +1,1215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#1d1916">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon.png">
+<link rel="apple-touch-icon" href="/icon.png">
+<title>Tavern DM</title>
+<style>
+:root{--bg:#14110f;--panel:#1d1916;--panel2:#26211d;--line:#3a322b;--text:#ece3d6;--muted:#a3968a;--accent:#d9a441;--accent2:#e6b55a;
+  --good:#7fb069;--bad:#d9625f;--xp:#8fa8e8;--you:#2f3a2a;--act:#b9ab9c;--speech:#f3ead9}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button:disabled{opacity:.45;cursor:default}
+button.primary{background:var(--accent);color:#1a1408;border-color:var(--accent);font-weight:600}
+button.ghost{background:transparent;border-color:transparent}
+button.danger{color:var(--bad)}
+button.icon{padding:6px 10px;font-size:18px;line-height:1}
+input,select,textarea{background:#110e0c;border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+input[type=checkbox],input[type=radio]{width:auto;accent-color:var(--accent)}
+textarea{resize:vertical}
+a{color:var(--accent)}
+.muted{color:var(--muted)}.small{font-size:12.5px}
+#app{display:flex;flex-direction:column;height:100dvh}
+#view{flex:1;overflow-y:auto;min-height:0}
+.wrap{max-width:980px;margin:0 auto;padding:14px 14px 24px}
+.topbar{display:flex;align-items:center;gap:8px;margin:2px 0 12px}
+.topbar h1{font-size:24px;margin:0 auto 0 0;color:var(--accent)}
+.topbar.sub h1{font-size:19px}
+h2.sec{font-size:13px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin:20px 0 10px}
+#nav{display:flex;border-top:1px solid var(--line);background:var(--panel);padding-bottom:env(safe-area-inset-bottom)}
+#nav button{flex:1;background:none;border:none;border-radius:0;padding:9px 0 8px;color:var(--muted);font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px}
+#nav button b{font-size:20px;font-weight:400;line-height:1.1}
+#nav button.on{color:var(--accent)}
+body.chatmode #nav{display:none}
+.av{border-radius:50%;object-fit:cover;flex:none;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:700;background:var(--panel2)}
+.stack{display:inline-flex;flex:none}.stack .av{border:2px solid var(--bg)}.stack .av+.av{margin-left:-14px}
+.search{margin-bottom:10px}
+.seg{display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none}
+.seg button{flex:1;white-space:nowrap;background:none;border:none;border-radius:9px;padding:7px 10px;color:var(--muted);font-size:14px}
+.seg button.on{background:var(--panel2);color:var(--accent);font-weight:600}
+.tags{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:6px;scrollbar-width:none}
+.tag{flex:none;font-size:12.5px;padding:4px 11px;border-radius:99px;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer;white-space:nowrap}
+.tag.on{background:var(--accent);color:#1a1408;border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;transition:transform .12s}
+.card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.card .pic{aspect-ratio:1/1;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:46px;font-weight:700;color:#fff;overflow:hidden}
+.card .pic img{width:100%;height:100%;object-fit:cover}
+.card .body{padding:9px 10px 11px}
+.card .name{font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .line{font-size:12.5px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.9em}
+.card .mini{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.mini span{font-size:10.5px;padding:1px 7px;border-radius:99px;background:var(--panel2);color:var(--muted)}
+.card.add .pic{font-size:40px;color:var(--accent);background:transparent;border-bottom:1px dashed var(--line)}
+.list .row{display:flex;align-items:center;gap:12px;padding:11px 8px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:10px}
+.list .row:hover{background:var(--panel)}
+.row .mid{flex:1;min-width:0}
+.row .ttl{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .sub{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .time{font-size:12px;color:var(--muted);flex:none;align-self:flex-start;margin-top:3px}
+.empty{text-align:center;color:var(--muted);padding:40px 16px}
+.empty b{display:block;font-size:40px;margin-bottom:6px}
+.profile{text-align:center}
+.profile .big{width:180px;height:180px;border-radius:24px;object-fit:cover;margin:6px auto 10px;display:flex;align-items:center;justify-content:center;font-size:70px;font-weight:700;color:#fff}
+.profile h1{margin:0;font-size:24px}
+.profile .tagline{color:var(--muted);margin:4px 0 10px}
+.profile .actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:14px 0}
+.info{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;text-align:left;white-space:pre-wrap}
+.info h4{margin:0 0 4px;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--accent)}
+.clamp{display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+/* chat */
+.chat{display:flex;flex-direction:column;height:100%}
+.chathead{display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:1px solid var(--line);background:var(--panel);padding-top:calc(8px + env(safe-area-inset-top))}
+.chathead .ttl{flex:1;min-width:0;cursor:pointer}
+.chathead .ttl b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chathead .ttl small{color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rpgbar{display:flex;gap:14px;padding:6px 14px;font-size:13px;border-bottom:1px solid var(--line);background:#181512;cursor:pointer;overflow-x:auto;white-space:nowrap}
+.rpgbar .hp{color:var(--good)}.rpgbar .gold{color:var(--accent)}.rpgbar .xp{color:var(--xp)}
+#msgs{flex:1;overflow-y:auto;padding:14px 12px 8px;min-height:0}
+.msgs-in{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.m{display:flex;gap:10px;align-items:flex-start}
+.m.user{flex-direction:row-reverse}
+.m .bub{background:var(--panel);border:1px solid var(--line);border-radius:4px 16px 16px 16px;padding:9px 13px;max-width:min(640px,82%);position:relative;overflow-wrap:anywhere}
+.m.user .bub{background:var(--you);border-color:#3e4b37;border-radius:16px 4px 16px 16px}
+.m .who{font-size:12px;color:var(--accent);font-weight:600;margin-bottom:2px}
+.m .txt p{margin:0 0 .55em}.m .txt p:last-child{margin:0}
+.m .txt em.act{color:var(--act);font-style:italic}
+.m .txt .sp{color:var(--speech)}
+.m.note{justify-content:center}
+.m.note .bub{background:transparent;border:1px dashed var(--accent);color:var(--accent);font-size:13px;border-radius:99px;padding:3px 12px;max-width:90%;text-align:center}
+.swipes{display:flex;align-items:center;gap:6px;margin-top:6px;color:var(--muted);font-size:12.5px;user-select:none}
+.swipes button{padding:1px 10px;font-size:15px;border-radius:99px;background:transparent}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.chip{font-size:11.5px;padding:1px 8px;border-radius:99px;border:1px solid var(--line);background:#110e0c}
+.chip.xp{color:var(--xp)}.chip.gold{color:var(--accent)}.chip.hpup{color:var(--good)}.chip.hpdn{color:var(--bad)}.chip.item{color:#cbb8e8}
+.editbox textarea{min-height:120px;margin-top:4px}
+.editbox .btns{display:flex;gap:6px;justify-content:flex-end;margin-top:6px}
+.speakers{display:flex;gap:8px;align-items:center;padding:6px 12px;border-top:1px solid var(--line);overflow-x:auto;background:var(--panel)}
+.speakers span{font-size:12px;color:var(--muted);flex:none}
+.speakers button{padding:2px;border-radius:50%;border:2px solid transparent;background:none;flex:none}
+.speakers button:hover{border-color:var(--accent)}
+.composer{display:flex;gap:8px;padding:8px 10px calc(10px + env(safe-area-inset-bottom));background:var(--panel);border-top:1px solid var(--line);align-items:flex-end}
+.composer .inner{max-width:820px;margin:0 auto;display:flex;gap:8px;width:100%;align-items:flex-end}
+.composer textarea{min-height:44px;max-height:170px;border-radius:22px;padding:11px 16px}
+.composer .send{border-radius:50%;width:44px;height:44px;padding:0;font-size:18px;flex:none}
+.typing{display:inline-flex;gap:4px}.typing i{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:b 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,80%,100%{opacity:.3;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+/* sheets, menus, toast */
+.sheet{position:fixed;inset:0;background:#000b;display:none;align-items:flex-end;justify-content:center;z-index:20}
+.sheet.open{display:flex}
+.sheet-card{background:var(--panel);border:1px solid var(--line);border-radius:18px 18px 0 0;width:100%;max-width:640px;max-height:90dvh;overflow-y:auto;padding:16px 16px calc(18px + env(safe-area-inset-bottom))}
+@media (min-width:700px){.sheet{align-items:center}.sheet-card{border-radius:18px}}
+.sheet-card h3{margin:0 0 12px;color:var(--accent)}
+.sheet-card h4{margin:16px 0 6px;font-size:12.5px;letter-spacing:1px;text-transform:uppercase;color:var(--accent)}
+.field{margin-bottom:12px}
+.field>label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:4px}
+.field .hint{font-size:12px;color:var(--muted);margin-top:3px}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:14px}
+.btnrow.left{justify-content:flex-start}
+.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.togs{display:flex;flex-wrap:wrap;gap:6px}
+.check{display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer}
+.menu-list button{display:flex;width:100%;text-align:left;gap:10px;background:none;border:none;border-radius:10px;padding:11px 10px}
+.menu-list button:hover{background:var(--panel2)}
+.menu-list button.danger{color:var(--bad)}
+.pop{position:fixed;z-index:30;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px #000a;padding:4px;display:none;min-width:170px}
+.pop.open{display:block}
+.pop button{display:block;width:100%;text-align:left;background:none;border:none;padding:9px 12px;border-radius:8px}
+.pop button:hover{background:var(--panel2)}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--line);padding:8px 16px;border-radius:99px;z-index:40;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;text-align:center}
+#toast.show{opacity:1}
+.imgfield{display:flex;align-items:center;gap:12px}
+.imgfield .av{width:84px;height:84px;border-radius:16px;font-size:34px}
+.textlist .item{display:flex;gap:6px;margin-bottom:6px}
+.status-ok{color:var(--good)}.status-bad{color:var(--bad)}
+.sheetstat{display:flex;justify-content:space-between;align-items:center;background:#110e0c;border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:8px}
+.sheetstat b{font-size:19px}
+.bar{height:6px;background:#110e0c;border-radius:4px;overflow:hidden;margin:-4px 0 10px}.bar>div{height:100%;background:var(--xp)}.bar.hp>div{background:var(--good)}
+.inv{list-style:none;padding:0;margin:0 0 8px}.inv li{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--line)}
+.inv li button{padding:0 9px}
+</style>
+</head>
+<body>
+<div id="app">
+  <main id="view"></main>
+  <nav id="nav">
+    <button data-nav="discover"><b>✦</b>Discover</button>
+    <button data-nav="chats"><b>💬</b>Chats</button>
+    <button data-nav="me"><b>☺</b>Me</button>
+  </nav>
+</div>
+<div class="sheet" id="sheet"><div class="sheet-card" id="sheetBody"></div></div>
+<div class="pop" id="pop"></div>
+<div id="toast"></div>
+<input type="file" id="importFile" accept=".png,.json,image/png,application/json" multiple style="display:none" title="Character cards or lorebooks">
+
+<script>
+// ============================================================ basics
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rid = () => Math.random().toString(36).slice(2, 10);
+const newId = () => 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const API = location.origin + '/v1';
+const OPT_DEFAULT = {pov:'second', length:'medium', difficulty:'normal', pacing:'balanced', intensity:'moderate', events:true, stats:true};
+const STATS_DEFAULT = {level:1, xp:0, gold:25, hp:20, maxHp:20, inventory:[{name:'Rations',qty:3},{name:'Torch',qty:2}]};
+let LIB = {genres:[], tones:[], characters:[], stories:[], personas:[], lore:[]};
+let SET = {model:'', temperature:0.85, maxTokens:1200, history:30, personaId:'', autoSummary:true};
+let CHAT = null, busy = false, abortCtl = null, discoverTag = '', discoverQ = '';
+
+async function api(path, opts = {}) {
+  const r = await fetch(path, {cache:'no-store', ...opts});
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
+  return j;
+}
+const post = (path, body) => api(path, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+async function loadLib() { try { LIB = {...LIB, ...(await api('/api/library'))}; } catch (e) { toast('Could not reach the Tavern DM app'); } }
+async function loadSettings() { try { SET = {...SET, ...(await api('/api/settings'))}; } catch (e) {} }
+function saveSettings() { post('/api/settings', SET).catch(() => {}); }
+function toast(msg, ms = 2200) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), ms); }
+function hue(s) { let h = 0; for (const c of String(s || '?')) h = (h * 31 + c.charCodeAt(0)) % 360; return h; }
+function avUrl(file) { return file === '__narrator' ? '/icon.png' : file ? '/avatars/' + encodeURIComponent(file) : ''; }
+function avatar(file, name, size = 40, extra = '') {
+  const u = avUrl(file);
+  if (u) return `<img class="av" ${extra} style="width:${size}px;height:${size}px" src="${u}" alt="">`;
+  return `<div class="av" ${extra} style="width:${size}px;height:${size}px;background:hsl(${hue(name)},40%,34%);font-size:${Math.round(size*.42)}px">${esc((name || '?').trim()[0]?.toUpperCase() || '?')}</div>`;
+}
+function timeAgo(ms) {
+  if (!ms) return ''; const s = (Date.now() - ms) / 1000;
+  if (s < 60) return 'now'; if (s < 3600) return Math.floor(s / 60) + 'm'; if (s < 86400) return Math.floor(s / 3600) + 'h';
+  if (s < 604800) return Math.floor(s / 86400) + 'd'; return new Date(ms).toLocaleDateString();
+}
+const charById = id => LIB.characters.find(c => c.id === id);
+const activePersona = () => LIB.personas.find(p => p.id === SET.personaId) || LIB.personas[0] || {name:'You', avatar:'', description:''};
+const sub = (t, char, user) => String(t || '').replace(/\{\{char\}\}|<BOT>/gi, char).replace(/\{\{user\}\}|<USER>/gi, user);
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// ============================================================ text helpers
+const TAG_RE = /\[(XP|EXP|GOLD|GP|MONEY|HP|ITEM)\s*:\s*([^\]]*)\]/gi;
+const stripThink = t => String(t || '').replace(/<think>[\s\S]*?(<\/think>|$)/gi, '');
+const cleanText = t => stripThink(t).replace(TAG_RE, '').replace(/\[[A-Za-z]{0,5}(:[^\]]*)?$/, '').replace(/\n{3,}/g, '\n\n').trim();
+function fmt(t) {
+  if (!t) return '';
+  let h = esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\*([^*\n]+?)\*/g, '<em class="act">$1</em>')
+    .replace(/&quot;([^\n]+?)&quot;|“([^”\n]+?)”/g, (m, a, b) => `<span class="sp">“${a ?? b}”</span>`);
+  return h.split(/\n{2,}/).map(p => '<p>' + p.replace(/\n/g, '<br>') + '</p>').join('');
+}
+
+// ============================================================ RPG
+const xpFor = L => 50 * L * (L - 1);
+const levelFromXp = xp => { let L = 1; while (xp >= xpFor(L + 1)) L++; return L; };
+const maxHpFor = L => 20 + (L - 1) * 6;
+const RPG_RULES = `TRACKING RULES:
+When the player gains or loses something, add tags on their own lines at the very end of your reply:
+[XP:+N] experience (10-30 small feats or clever ideas, 50-150 victories or finished quests)
+[GOLD:+N] or [GOLD:-N] money gained or spent
+[HP:-N] or [HP:+N] damage or healing
+[ITEM:+Name] or [ITEM:-Name] items gained or used/lost (quantities like [ITEM:+3 Arrows])
+Only use tags when the change actually happens. The player can't spend more gold than they have. At 0 HP they are downed.
+When an action's outcome is uncertain, ask the player to roll (e.g. "Roll a d20") and wait. DC 10 easy, 15 medium, 20 hard.`;
+function parseTags(t) {
+  const out = []; let m; const src = stripThink(t); TAG_RE.lastIndex = 0;
+  while ((m = TAG_RE.exec(src))) {
+    let type = m[1].toUpperCase(), val = m[2].trim();
+    if (type === 'EXP') type = 'XP'; if (type === 'GP' || type === 'MONEY') type = 'GOLD';
+    if (type === 'ITEM') {
+      const im = val.match(/^([+-])?\s*(\d+)?\s*x?\s+(.+)$/i) || val.match(/^([+-])?\s*()(.+)$/);
+      if (!im) continue;
+      const qty = parseInt(im[2] || '1') * (im[1] === '-' ? -1 : 1), name = im[3].trim();
+      if (name) out.push({type, name, qty});
+    } else { const n = parseInt(val.replace(/[^\d+-]/g, '')); if (!isNaN(n) && n !== 0) out.push({type, n}); }
+  }
+  return out;
+}
+function applyChanges(list) {
+  const c = CHAT.stats, applied = [], notes = [];
+  for (const ch of list) {
+    if (ch.type === 'XP') {
+      const before = c.level; c.xp = Math.max(0, c.xp + ch.n); applied.push({type:'XP', n:ch.n});
+      c.level = levelFromXp(c.xp); const mx = maxHpFor(c.level);
+      if (c.level > before) { c.maxHp = mx; c.hp = mx; notes.push(`⭐ Level up! Level ${c.level} (HP ${mx})`); }
+      else if (c.level < before) { c.maxHp = mx; c.hp = Math.min(c.hp, mx); }
+    } else if (ch.type === 'GOLD') { const d = Math.max(-c.gold, ch.n); c.gold += d; if (d) applied.push({type:'GOLD', n:d}); }
+    else if (ch.type === 'HP') {
+      const nhp = Math.max(0, Math.min(c.maxHp, c.hp + ch.n)), d = nhp - c.hp; c.hp = nhp; if (d) applied.push({type:'HP', n:d});
+      if (c.hp === 0 && d < 0) notes.push('💀 You have been downed!');
+    } else if (ch.type === 'ITEM') {
+      const ex = c.inventory.find(i => i.name.toLowerCase() === ch.name.toLowerCase());
+      if (ch.qty > 0) { if (ex) ex.qty += ch.qty; else c.inventory.push({name:ch.name, qty:ch.qty}); applied.push(ch); }
+      else if (ex) { const d = Math.min(ex.qty, -ch.qty); ex.qty -= d; if (ex.qty <= 0) c.inventory = c.inventory.filter(i => i !== ex); applied.push({type:'ITEM', name:ex.name, qty:-d}); }
+    }
+  }
+  return {applied, notes};
+}
+const revertChanges = list => applyChanges((list || []).slice().reverse().map(ch => ch.type === 'ITEM' ? {...ch, qty:-ch.qty} : {...ch, n:-ch.n}));
+function chipHtml(ch) {
+  if (ch.type === 'XP') return `<span class="chip xp">${ch.n > 0 ? '+' : ''}${ch.n} XP</span>`;
+  if (ch.type === 'GOLD') return `<span class="chip gold">${ch.n > 0 ? '+' : ''}${ch.n} gold</span>`;
+  if (ch.type === 'HP') return `<span class="chip ${ch.n > 0 ? 'hpup' : 'hpdn'}">${ch.n > 0 ? '+' : ''}${ch.n} HP</span>`;
+  return `<span class="chip item">${ch.qty > 0 ? '+' : '−'}${Math.abs(ch.qty) > 1 ? Math.abs(ch.qty) + ' ' : ''}${esc(ch.name)}</span>`;
+}
+function statusLine() {
+  const c = CHAT.stats, inv = c.inventory.length ? c.inventory.map(i => i.qty > 1 ? `${i.name} x${i.qty}` : i.name).join(', ') : 'nothing';
+  return `[Status: Level ${c.level} | HP ${c.hp}/${c.maxHp} | Gold ${c.gold} | XP ${c.xp}/${xpFor(c.level + 1)} | Inventory: ${inv}]`;
+}
+
+// ============================================================ chats: model & storage
+function snap(c) { return {name:c.name, avatar:c.avatar || '', tagline:c.tagline || '', description:c.description || '', personality:c.personality || '',
+  appearance:c.appearance || '', scenario:c.scenario || '', example_dialogue:c.example_dialogue || '', instructions:c.instructions || '', class:c.class || ''}; }
+function normMsg(m) {
+  m = {...m}; m.id = m.id || rid();
+  if (m.role === 'assistant') {
+    if (!Array.isArray(m.swipes) || !m.swipes.length) m.swipes = [m.content || ''];
+    m.sw = Math.max(0, Math.min(m.sw || 0, m.swipes.length - 1));
+    if (!Array.isArray(m.appliedS)) m.appliedS = m.swipes.map((_, i) => i === m.sw ? (m.applied || []) : []);
+    m.content = m.swipes[m.sw]; m.charId = m.charId || 'narrator'; delete m.applied;
+  }
+  return m;
+}
+function normalizeChat(d, id) {
+  d = d || {};
+  const old = d.char || {};
+  const c = {id:d.id || id, type:d.type || 'story', title:d.title || '', members:d.members || [], cast:d.cast || {},
+    summary:d.summary || '', notes:d.notes || '', sumIdx:d.sumIdx || 0, updatedAt:d.updatedAt || 0};
+  c.options = {...OPT_DEFAULT, ...(d.options || d.story?.options || {})};
+  if (c.type === 'story') {
+    c.story = d.story || {title:'My adventure', genres:[], tones:[], setting:d.settings?.world || '', premise:'', opening:'', role:'', characters:[], instructions:''};
+    c.story.mode = c.story.mode || d.settings?.mode || 'dm';
+  }
+  c.persona = d.persona || {name:old.name || activePersona().name, avatar:'', description:old.background || d.settings?.backstory || '', cls:old.cls || ''};
+  const st = d.stats || (d.char ? {level:old.level, xp:old.xp, gold:old.gold, hp:old.hp, maxHp:old.maxHp, inventory:old.inventory} : {});
+  c.stats = {...STATS_DEFAULT}; for (const k in st) if (st[k] !== undefined) c.stats[k] = st[k];
+  c.stats.inventory = structuredClone(c.stats.inventory || []);
+  c.rpg = d.rpg ?? (c.type === 'story' ? c.options.stats !== false : false);
+  c.messages = (d.messages || []).map(normMsg);
+  return c;
+}
+function baseChat(type, chars) {
+  const p = activePersona();
+  return {id:newId(), type, title:'', members:chars.map(c => c.id), cast:Object.fromEntries(chars.map(c => [c.id, snap(c)])),
+    persona:{name:p.name, avatar:p.avatar || '', description:p.description || ''}, rpg:chars.some(c => c.rpg),
+    stats:structuredClone(STATS_DEFAULT), options:{...OPT_DEFAULT}, summary:'', notes:'', sumIdx:0, messages:[], updatedAt:0};
+}
+function charInfo(id) {
+  if (id === 'narrator') return {name: CHAT?.story?.mode === 'story' ? 'Narrator' : 'Dungeon Master', avatar:'__narrator'};
+  return charById(id) || CHAT?.cast?.[id] || {name:'Unknown', avatar:''};
+}
+function chatTitle(c = CHAT) {
+  if (c.title) return c.title;
+  if (c.type === 'story') return c.story?.title || 'Adventure';
+  return c.members.map(id => charInfo(id).name).join(', ');
+}
+let saveTimers = {};
+function saveChat(chat = CHAT, now = false) {
+  if (!chat) return;
+  chat.updatedAt = Date.now();
+  clearTimeout(saveTimers[chat.id]);
+  const go = () => post('/api/save/' + encodeURIComponent(chat.id), chat).catch(() => toast('⚠ Could not save — is the app running?'));
+  if (now) return go();
+  saveTimers[chat.id] = setTimeout(go, 400);
+}
+
+// ============================================================ router
+window.addEventListener('hashchange', route);
+function go(h) { if (location.hash === h) route(); else location.hash = h; }
+async function route() {
+  closeSheet(); closePop();
+  const [, view = 'discover', a = '', b = ''] = (location.hash || '#/discover').split('/');
+  document.body.classList.toggle('chatmode', view === 'chat');
+  document.querySelectorAll('#nav button').forEach(x => x.classList.toggle('on', x.dataset.nav === view ||
+    (x.dataset.nav === 'discover' && (view === 'char' || view === 'story' || (view === 'edit' && a !== 'personas'))) || (x.dataset.nav === 'me' && (view === 'lib' || (view === 'edit' && a === 'personas')))));
+  if (abortCtl && view !== 'chat') abortCtl.abort();
+  if (view === 'chat') return openChat(decodeURIComponent(a));
+  const views = {discover:() => viewDiscover(a), chats:viewChats, me:viewMe, char:() => viewChar(a), story:() => viewStory(a), lib:() => viewLib(a), edit:() => viewEdit(a, b)};
+  await (views[view] || viewDiscover)();
+  $('view').scrollTop = 0;
+}
+document.querySelectorAll('#nav button').forEach(b => b.onclick = () => go('#/' + b.dataset.nav));
+
+// ============================================================ discover
+const DTABS = [['characters', '🎭 Characters'], ['stories', '📜 Stories'], ['lore', '📖 Lore'], ['genres', '🗺️ Genres']];
+const CREATE_MENU = [['🎭 Character', 'characters'], ['📜 Story', 'stories'], ['📖 Lore entry', 'lore'], ['🗺️ Genre', 'genres'], ['🎬 Story type', 'tones']];
+let discoverTab = 'characters';
+function picHtml(img, name, emoji) {
+  if (img) return `<div class="pic"><img src="${avUrl(img)}" loading="lazy" alt=""></div>`;
+  return `<div class="pic" style="background:hsl(${hue(name)},38%,${emoji ? 22 : 30}%)">${emoji || esc((name || '?')[0].toUpperCase())}</div>`;
+}
+function cardHtml(attr, id, img, name, line, minis, emoji) {
+  return `<div class="card" ${attr}="${esc(id)}">${picHtml(img, name, emoji)}<div class="body"><div class="name">${esc(name || '(untitled)')}</div>
+    <div class="line">${esc(line || '')}</div>${minis.length ? `<div class="mini">${minis.slice(0, 3).map(t => `<span>${esc(t)}</span>`).join('')}</div>` : ''}</div></div>`;
+}
+const addCard = (section, title, line) => `<div class="card add" data-new="${section}"><div class="pic">＋</div><div class="body"><div class="name">${title}</div><div class="line">${line}</div></div></div>`;
+const charCard = c => cardHtml('data-char', c.id, c.avatar, c.name, c.tagline || c.description, c.tags || []);
+const nameOf = (list, id) => LIB[list].find(x => x.id === id)?.name;
+const storyTags = s => [...new Set([...(s.genres || []).map(id => nameOf('genres', id)), ...(s.tones || []).map(id => nameOf('tones', id)), ...(s.tags || [])].filter(Boolean))];
+function storyCard(s) {
+  return cardHtml('data-story', s.id, s.cover, s.title, s.premise || s.setting, [s.mode === 'story' ? 'Story' : 'Dungeon Master', ...storyTags(s)], s.cover ? '' : '📜');
+}
+async function viewDiscover(tab) {
+  if (tab && DTABS.some(t => t[0] === tab)) discoverTab = tab;
+  await loadLib();
+  $('view').innerHTML = `<div class="wrap">
+    <div class="topbar"><h1>Discover</h1><button id="impBtn" title="Import character cards or lorebooks">⇪ Import</button><button class="primary" id="newBtn">+ Create</button></div>
+    <div class="seg">${DTABS.map(([k, l]) => `<button data-tab="${k}" class="${k === discoverTab ? 'on' : ''}">${l}</button>`).join('')}</div>
+    <input class="search" id="dq" value="${esc(discoverQ)}">
+    <div class="tags" id="dtags"></div><div id="dlist"></div></div>`;
+  $('impBtn').onclick = () => $('importFile').click();
+  $('newBtn').onclick = e => showPop(e.currentTarget, CREATE_MENU.map(([l, s]) => [l, () => go(`#/edit/${s}/new`)]));
+  $('view').querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { discoverTag = ''; go('#/discover/' + b.dataset.tab); });
+  $('dq').oninput = e => { discoverQ = e.target.value; renderDiscoverList(); };
+  renderDiscoverList();
+}
+function renderDiscoverList() {
+  const tab = discoverTab, q = discoverQ.toLowerCase();
+  const match = (...f) => !q || f.some(x => String(x || '').toLowerCase().includes(q));
+  $('dq').placeholder = {characters:'Search characters…', stories:'Search stories…', lore:'Search lore…', genres:'Search genres and story types…'}[tab];
+  const tagsOf = {characters:c => c.tags || [], stories:storyTags, lore:e => e.book ? [e.book] : []}[tab];
+  const pool = {characters:LIB.characters.filter(c => !/player/i.test(c.role || '')), stories:LIB.stories, lore:LIB.lore}[tab] || [];
+  const counts = {};
+  if (tagsOf) pool.forEach(it => tagsOf(it).forEach(t => counts[t] = (counts[t] || 0) + 1));
+  const tags = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+  if (discoverTag && !counts[discoverTag]) discoverTag = '';
+  $('dtags').innerHTML = tags.length ? [`<span class="tag ${discoverTag ? '' : 'on'}" data-tag="">All</span>`,
+    ...tags.map(t => `<span class="tag ${t === discoverTag ? 'on' : ''}" data-tag="${esc(t)}">${esc(t)}</span>`)].join('') : '';
+  $('dtags').querySelectorAll('.tag').forEach(t => t.onclick = () => { discoverTag = t.dataset.tag; renderDiscoverList(); });
+  const byTag = it => !discoverTag || tagsOf(it).includes(discoverTag);
+  let html = '';
+  if (tab === 'characters') {
+    const list = pool.filter(c => byTag(c) && match(c.name, c.tagline, c.description, (c.tags || []).join(' ')));
+    html = `<div class="grid">${list.map(charCard).join('')}${q || discoverTag ? '' : addCard('characters', 'New character', 'Create one, or import a SillyTavern card with ⇪ Import.')}</div>`
+      + (!list.length && (q || discoverTag) ? `<div class="empty"><b>🎭</b>No characters match.</div>` : '');
+  } else if (tab === 'stories') {
+    const list = pool.filter(s => byTag(s) && match(s.title, s.premise, s.setting, storyTags(s).join(' ')));
+    html = `<div class="grid">${list.map(storyCard).join('')}
+      ${q || discoverTag ? '' : `<div class="card add" data-quick="1"><div class="pic">🎲</div><div class="body"><div class="name">Quick story</div><div class="line">Pick genres and options for a one-off adventure, or let the AI surprise you.</div></div></div>`
+        + addCard('stories', 'New story', 'Save a story to play again: setting, plot, characters.')}</div>`
+      + (!list.length && (q || discoverTag) ? `<div class="empty"><b>📜</b>No stories match.</div>` : '');
+  } else if (tab === 'lore') {
+    const list = pool.filter(e => byTag(e) && match(e.name, e.content, e.book, (e.keys || []).join(' ')));
+    const books = {};
+    list.forEach(e => (books[e.book || ''] = books[e.book || ''] || []).push(e));
+    const names = Object.keys(books).sort((a, b) => (a === '') - (b === '') || a.localeCompare(b));
+    html = `<p class="muted small">When a trigger word comes up in a chat, that entry is given to the AI so it remembers your world. Import SillyTavern lorebooks with ⇪ Import.</p>`
+      + names.map(b => `${names.length > 1 || b ? `<h2 class="sec">${esc(b || 'Other entries')}</h2>` : ''}<div class="list">${books[b].map(e => `<div class="row" data-lore="${esc(e.id)}">
+          <span style="font-size:22px;width:40px;text-align:center">📖</span><div class="mid"><div class="ttl">${esc(e.name || '(untitled)')}${e.enabled === false ? ' <span class="muted small">(off)</span>' : ''}</div>
+          <div class="sub">${esc((e.keys || []).length ? '🔑 ' + e.keys.join(', ') : 'Always included')} · ${esc((e.content || '').slice(0, 80))}</div></div><span class="muted">›</span></div>`).join('')}</div>`).join('')
+      + (list.length ? '' : `<div class="empty"><b>📖</b>${q || discoverTag ? 'No lore matches.' : 'No lore yet.'}</div>`)
+      + `<div class="btnrow left"><button class="primary" data-new="lore">+ New lore entry</button></div>`;
+  } else {
+    const sec = (key, title, desc) => {
+      const list = LIB[key].filter(g => match(g.name, g.prompt));
+      return `<h2 class="sec">${title}</h2><p class="muted small" style="margin-top:-4px">${desc}</p><div class="grid">${list.map(g => cardHtml(`data-${key}`, g.id, g.image, g.name, g.prompt, [], key === 'genres' ? '🗺️' : '🎬')).join('')}
+        ${q ? '' : addCard(key, key === 'genres' ? 'New genre' : 'New story type', key === 'genres' ? 'A kind of world.' : 'A kind of story.')}</div>`;
+    };
+    html = sec('genres', 'Genres', 'The kind of world: fantasy, sci-fi, western…') + sec('tones', 'Story types', 'The kind of story: comedy, horror, action…');
+  }
+  $('dlist').innerHTML = html;
+  const L = $('dlist');
+  L.querySelectorAll('[data-char]').forEach(c => c.onclick = () => go('#/char/' + c.dataset.char));
+  L.querySelectorAll('[data-story]').forEach(c => c.onclick = () => go('#/story/' + c.dataset.story));
+  L.querySelectorAll('[data-lore]').forEach(c => c.onclick = () => go('#/edit/lore/' + c.dataset.lore));
+  L.querySelectorAll('[data-genres]').forEach(c => c.onclick = () => go('#/edit/genres/' + c.dataset.genres));
+  L.querySelectorAll('[data-tones]').forEach(c => c.onclick = () => go('#/edit/tones/' + c.dataset.tones));
+  L.querySelectorAll('[data-new]').forEach(c => c.onclick = () => go(`#/edit/${c.dataset.new}/new`));
+  L.querySelectorAll('[data-quick]').forEach(c => c.onclick = () => openStorySetup(''));
+}
+
+// ============================================================ story page
+async function viewStory(id) {
+  await Promise.all([loadLib(), loadChatIndex()]);
+  const s = LIB.stories.find(x => x.id === id);
+  if (!s) return go('#/discover/stories');
+  const existing = chatIndex.find(g => g.type === 'story' && g.template === id);
+  const cast = (s.characters || []).map(charById).filter(Boolean);
+  $('view').innerHTML = `<div class="wrap" style="max-width:640px">
+    <div class="topbar sub"><button class="icon ghost" onclick="history.back()">‹</button><h1></h1><button class="icon ghost" id="smenu">⋯</button></div>
+    <div class="profile">
+      ${s.cover ? `<img class="big" src="${avUrl(s.cover)}" alt="">` : `<div class="big" style="background:hsl(${hue(s.title)},38%,24%)">📜</div>`}
+      <h1>${esc(s.title)}</h1><div class="tagline">${s.mode === 'story' ? 'Story roleplay' : 'Dungeon Master adventure'}${s.rpg === false ? '' : ' · 🎲 RPG'}</div>
+      <div class="tags" style="justify-content:center;flex-wrap:wrap">${storyTags(s).map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
+      <div class="actions">
+        ${existing ? `<button class="primary" id="contBtn">▶ Continue</button><button id="playBtn">＋ New playthrough</button>` : `<button class="primary" id="playBtn">▶ Play</button>`}
+        <button id="editBtn">✏️ Edit</button>
+      </div>
+      ${s.premise ? `<div class="info"><h4>Premise</h4>${esc(s.premise)}</div>` : ''}
+      ${s.setting ? `<div class="info"><h4>Setting</h4>${esc(s.setting)}</div>` : ''}
+      ${s.opening ? `<div class="info"><h4>Opening scene</h4>${esc(s.opening)}</div>` : ''}
+      ${s.role ? `<div class="info"><h4>Your role</h4>${esc(s.role)}</div>` : ''}
+      ${cast.length ? `<div class="info"><h4>Characters</h4><div class="list">${cast.map(c => `<div class="row" data-char="${esc(c.id)}">${avatar(c.avatar, c.name, 38)}<div class="mid"><div class="ttl">${esc(c.name)}</div><div class="sub">${esc(c.tagline || c.role || '')}</div></div></div>`).join('')}</div></div>` : ''}
+      ${!s.premise && !s.setting ? `<p class="muted small">Setting and plot are left to the AI to invent.</p>` : ''}
+    </div></div>`;
+  if (existing) $('contBtn').onclick = () => go('#/chat/' + existing.id);
+  $('playBtn').onclick = () => openStorySetup(id);
+  $('editBtn').onclick = () => go('#/edit/stories/' + id);
+  $('view').querySelectorAll('[data-char]').forEach(r => r.onclick = () => go('#/char/' + r.dataset.char));
+  $('smenu').onclick = e => showPop(e.currentTarget, [
+    ['⧉ Duplicate', async () => { const copy = {...structuredClone(s), id:'', title:s.title + ' (copy)'}; const saved = await post('/api/library/stories', copy); go('#/story/' + saved.id); }],
+    ['🗑 Delete story', async () => { if (confirm(`Delete “${s.title}”? Playthroughs are kept.`)) { await api('/api/library/stories/' + id, {method:'DELETE'}); go('#/discover/stories'); } }],
+  ]);
+}
+
+// ============================================================ character profile
+let chatIndex = [];
+async function loadChatIndex() { try { chatIndex = await api('/api/saves'); } catch (e) { chatIndex = []; } return chatIndex; }
+async function viewChar(id) {
+  await loadLib(); const c = charById(id);
+  if (!c) return go('#/discover');
+  await loadChatIndex();
+  const existing = chatIndex.find(g => g.type === 'char' && g.members?.length === 1 && g.members[0] === id);
+  const user = activePersona().name || 'You';
+  $('view').innerHTML = `<div class="wrap" style="max-width:640px">
+    <div class="topbar sub"><button class="icon ghost" onclick="history.back()">‹</button><h1></h1><button class="icon ghost" id="pmenu">⋯</button></div>
+    <div class="profile">
+      ${c.avatar ? `<img class="big" src="${avUrl(c.avatar)}" alt="">` : `<div class="big" style="background:hsl(${hue(c.name)},40%,32%)">${esc(c.name[0] || '?')}</div>`}
+      <h1>${esc(c.name)}</h1><div class="tagline">${esc(c.tagline || '')}</div>
+      <div class="tags" style="justify-content:center">${(c.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
+      <div class="actions">
+        ${existing ? `<button class="primary" id="contBtn">💬 Continue chat</button><button id="newChatBtn">＋ New chat</button>` : `<button class="primary" id="newChatBtn">💬 Start chat</button>`}
+        <button id="editBtn">✏️ Edit</button>
+      </div>
+      ${c.description ? `<div class="info"><h4>About</h4><div class="clamp" id="descTxt">${esc(sub(c.description, c.name, user))}</div></div>` : ''}
+      ${c.scenario ? `<div class="info"><h4>Scenario</h4>${esc(sub(c.scenario, c.name, user))}</div>` : ''}
+      ${c.greeting ? `<div class="info"><h4>First message</h4><div class="m"><div class="txt">${fmt(sub(c.greeting, c.name, user))}</div></div></div>` : ''}
+      ${c.rpg ? `<p class="muted small">🎲 RPG mode: chats track gold, XP, HP and dice rolls.</p>` : ''}
+    </div></div>`;
+  if ($('descTxt')) $('descTxt').onclick = e => e.currentTarget.classList.toggle('clamp');
+  if (existing) $('contBtn').onclick = () => go('#/chat/' + existing.id);
+  $('newChatBtn').onclick = () => startCharChat(id);
+  $('editBtn').onclick = () => go('#/edit/characters/' + id);
+  $('pmenu').onclick = e => showPop(e.currentTarget, [
+    ['👥 Group chat with…', () => openGroupPicker([id])],
+    ['🗑 Delete character', async () => { if (confirm(`Delete ${c.name}? Existing chats are kept.`)) { await api('/api/library/characters/' + id, {method:'DELETE'}); go('#/discover'); } }],
+  ]);
+}
+function startCharChat(id) {
+  const c = charById(id); const chat = baseChat('char', [c]); const user = chat.persona.name || 'You';
+  if (c.greeting) {
+    const gs = [c.greeting, ...(c.alt_greetings || [])].filter(Boolean).map(g => sub(g, c.name, user));
+    chat.messages.push({id:rid(), role:'assistant', charId:c.id, swipes:gs, sw:0, appliedS:gs.map(() => []), content:gs[0]});
+  }
+  CHAT = chat; saveChat(chat, true); go('#/chat/' + chat.id);
+}
+
+// ============================================================ chats list
+async function viewChats() {
+  await Promise.all([loadLib(), loadChatIndex()]);
+  $('view').innerHTML = `<div class="wrap" style="max-width:720px">
+    <div class="topbar"><h1>Chats</h1><button id="grpBtn">👥 Group chat</button></div>
+    <div class="list" id="clist">${chatIndex.length ? chatIndex.map(g => {
+      const avs = (g.avatars || []).slice(0, 3);
+      const names = g.names || [];
+      return `<div class="row" data-chat="${esc(g.id)}"><span class="stack">${avs.length ? avs.map((a, i) => avatar(a, names[i] || g.title, avs.length > 1 ? 40 : 48)).join('') : avatar('', g.title, 48)}</span>
+        <div class="mid"><div class="ttl">${esc(g.title)}</div><div class="sub">${esc(g.last || (g.type === 'story' ? 'Adventure' : 'New chat'))}</div></div>
+        <div class="time">${timeAgo(g.updatedAt)}</div></div>`;
+    }).join('') : `<div class="empty"><b>💬</b>No chats yet.<br>Pick a character in Discover to start one.</div>`}</div></div>`;
+  $('grpBtn').onclick = () => openGroupPicker([]);
+  $('clist').querySelectorAll('[data-chat]').forEach(r => r.onclick = () => go('#/chat/' + r.dataset.chat));
+}
+function openGroupPicker(pre) {
+  const chars = LIB.characters.filter(c => !/player/i.test(c.role || ''));
+  openSheet(`<h3>New group chat</h3><p class="muted small">Pick two or more characters. Tap a character's face above the message box to make them speak.</p>
+    <div>${chars.map(c => `<label class="check">${'<input type="checkbox" value="' + esc(c.id) + '"' + (pre.includes(c.id) ? ' checked' : '') + '>'} ${avatar(c.avatar, c.name, 32)} ${esc(c.name)}</label>`).join('')}</div>
+    <div class="btnrow"><button onclick="closeSheet()">Cancel</button><button class="primary" id="grpGo">Start group chat</button></div>`);
+  $('grpGo').onclick = () => {
+    const ids = [...$('sheetBody').querySelectorAll('input:checked')].map(i => i.value);
+    if (ids.length < 2) return toast('Pick at least two characters');
+    const chat = baseChat('group', ids.map(charById));
+    chat.messages.push({id:rid(), role:'note', content:`Group chat with ${ids.map(i => charById(i).name).join(', ')}`});
+    CHAT = chat; saveChat(chat, true); closeSheet(); go('#/chat/' + chat.id);
+  };
+}
+
+// ============================================================ chat view
+async function openChat(id) {
+  if (!CHAT || CHAT.id !== id) {
+    try { const d = await api('/api/save/' + encodeURIComponent(id)); if (!d || !Object.keys(d).length) throw 0; CHAT = normalizeChat(d, id); }
+    catch (e) { toast('Chat not found'); return go('#/chats'); }
+  }
+  await loadLib();
+  renderChatView();
+}
+function renderChatView() {
+  const c = CHAT, members = c.type === 'story' ? [] : c.members;
+  const heads = c.type === 'story' ? avatar('__narrator', 'DM', 38) : `<span class="stack">${members.slice(0, 3).map(id => avatar(charInfo(id).avatar, charInfo(id).name, 38)).join('')}</span>`;
+  const subtitle = c.type === 'group' ? members.map(id => charInfo(id).name).join(', ') : c.type === 'story' ? (c.story.mode === 'story' ? 'Story roleplay' : 'Dungeon Master') : (charInfo(members[0]).tagline || '');
+  $('view').innerHTML = `<div class="chat">
+    <div class="chathead"><button class="icon ghost" id="backBtn">‹</button>${heads}
+      <div class="ttl" id="ttlBtn"><b>${esc(chatTitle())}</b><small>${esc(subtitle)}</small></div>
+      <button class="icon ghost" id="menuBtn">⋮</button></div>
+    <div id="rpgbar"></div>
+    <div id="msgs"><div class="msgs-in" id="msgsIn"></div></div>
+    ${c.type === 'group' ? `<div class="speakers"><span>Make speak:</span>${members.map(id => `<button data-speak="${esc(id)}" title="${esc(charInfo(id).name)}">${avatar(charInfo(id).avatar, charInfo(id).name, 34)}</button>`).join('')}</div>` : ''}
+    <div class="composer"><div class="inner">
+      ${c.rpg ? `<button class="icon" id="diceBtn" title="Roll dice">🎲</button>` : ''}
+      <textarea id="input" rows="1" placeholder="${c.type === 'story' ? 'What do you do?' : 'Message…'}"></textarea>
+      <button class="send primary" id="sendBtn" title="Send">➤</button></div></div></div>`;
+  $('backBtn').onclick = () => go('#/chats');
+  $('ttlBtn').onclick = () => { if (c.type === 'char') go('#/char/' + members[0]); else openChatMenu(); };
+  $('menuBtn').onclick = openChatMenu;
+  $('sendBtn').onclick = () => busy ? abortCtl?.abort() : send();
+  const inp = $('input');
+  inp.addEventListener('input', autoSize);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !matchMedia('(pointer:coarse)').matches) { e.preventDefault(); send(); } });
+  if ($('diceBtn')) $('diceBtn').onclick = e => showPop(e.currentTarget, [4, 6, 8, 10, 12, 20, 100].map(d => [`d${d}`, () => roll(d)]));
+  $('view').querySelectorAll('[data-speak]').forEach(b => b.onclick = () => { if (!busy) { const t = inp.value.trim(); if (t) send(); else generate('new', b.dataset.speak); } });
+  renderRpgBar(); renderMsgs(true); setBusy(busy);
+  if (!c.messages.some(m => m.role === 'assistant' || m.role === 'user') && c.type === 'story') generate('new', 'narrator');
+}
+function autoSize() { const t = $('input'); if (!t) return; t.style.height = 'auto'; t.style.height = Math.min(170, t.scrollHeight) + 'px'; }
+function roll(d) {
+  const r = 1 + Math.floor(Math.random() * d), t = $('input');
+  t.value = (t.value.trim() ? t.value.trim() + ' ' : '') + `🎲 d${d}: ${r}${d === 20 && r === 20 ? ' (CRITICAL!)' : d === 20 && r === 1 ? ' (fumble)' : ''}`;
+  autoSize(); t.focus();
+}
+function renderRpgBar() {
+  const el = $('rpgbar'); if (!el) return;
+  if (!CHAT.rpg) { el.innerHTML = ''; return; }
+  const s = CHAT.stats;
+  el.innerHTML = `<div class="rpgbar"><span class="hp">❤ ${s.hp}/${s.maxHp}</span><span class="gold">🪙 ${s.gold}</span><span class="xp">⭐ Lv ${s.level} · ${s.xp}/${xpFor(s.level + 1)} XP</span><span class="muted">🎒 ${s.inventory.length} items ›</span></div>`;
+  el.firstChild.onclick = openStatSheet;
+}
+function nearBottom() { const b = $('msgs'); return !b || b.scrollHeight - b.scrollTop - b.clientHeight < 160; }
+function scrollDown(force) { const b = $('msgs'); if (b && (force || nearBottom())) b.scrollTop = b.scrollHeight; }
+function msgHtml(m, isLast) {
+  if (m.role === 'note') return `<div class="m note" data-id="${m.id}"><div class="bub">${esc(m.content)}</div></div>`;
+  if (m.role === 'user') {
+    const p = CHAT.persona;
+    return `<div class="m user" data-id="${m.id}">${avatar(p.avatar, p.name || 'You', 34)}<div class="bub"><div class="txt">${fmt(m.content)}</div></div></div>`;
+  }
+  const who = charInfo(m.charId), applied = CHAT.rpg ? (m.appliedS?.[m.sw] || []) : [];
+  const swipes = isLast ? `<div class="swipes"><button data-sw="-1" ${m.sw ? '' : 'disabled'}>‹</button><span>${m.sw + 1}/${m.swipes.length}</span><button data-sw="1" title="Next / new reply">›</button></div>` : '';
+  const body = cleanText(m.content) ? fmt(cleanText(m.content)) : `<span class="typing"><i></i><i></i><i></i></span>`;
+  return `<div class="m ai" data-id="${m.id}">${avatar(who.avatar, who.name, 34)}<div class="bub">
+    <div class="who">${esc(who.name)}</div><div class="txt">${body}</div>${applied.length ? `<div class="chips">${applied.map(chipHtml).join('')}</div>` : ''}${swipes}</div></div>`;
+}
+function renderMsgs(force) {
+  const box = $('msgsIn'); if (!box) return;
+  const msgs = CHAT.messages, last = msgs.at(-1);
+  box.innerHTML = msgs.length ? msgs.map(m => msgHtml(m, m === last && m.role === 'assistant')).join('')
+    : `<div class="empty"><b>${CHAT.type === 'group' ? '👥' : '💬'}</b>Say something to start.</div>`;
+  box.querySelectorAll('.m:not(.note) .bub').forEach(b => {
+    const id = b.parentElement.dataset.id;
+    b.addEventListener('click', e => { if (e.target.closest('.swipes,.editbox')) return; msgMenu(id, b); });
+  });
+  box.querySelectorAll('[data-sw]').forEach(b => b.onclick = e => { e.stopPropagation(); swipe(+b.dataset.sw); });
+  const lastBub = box.querySelector('.m.ai:last-child .bub');
+  if (lastBub && last?.role === 'assistant') {
+    let x0 = null;
+    lastBub.addEventListener('touchstart', e => x0 = e.touches[0].clientX, {passive:true});
+    lastBub.addEventListener('touchend', e => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null;
+      if (Math.abs(dx) > 70) swipe(dx < 0 ? 1 : -1); });
+  }
+  scrollDown(force);
+}
+function setBusy(b) {
+  busy = b; const s = $('sendBtn'); if (!s) return;
+  s.textContent = b ? '■' : '➤'; s.title = b ? 'Stop' : 'Send';
+}
+function send() {
+  if (busy) return;
+  const t = $('input'), text = t.value.trim();
+  if (text) { CHAT.messages.push({id:rid(), role:'user', content:text}); t.value = ''; autoSize(); saveChat(); }
+  generate('new');
+}
+function pickSpeaker() {
+  if (CHAT.type === 'story') return 'narrator';
+  if (CHAT.type !== 'group') return CHAT.members[0];
+  const lastUser = [...CHAT.messages].reverse().find(m => m.role === 'user');
+  const text = (lastUser?.content || '').toLowerCase();
+  const named = CHAT.members.map(id => [id, text.indexOf(charInfo(id).name.split(' ')[0].toLowerCase())]).filter(x => x[1] >= 0).sort((a, b) => a[1] - b[1]);
+  if (named.length) return named[0][0];
+  const lastAi = [...CHAT.messages].reverse().find(m => m.role === 'assistant');
+  const i = CHAT.members.indexOf(lastAi?.charId);
+  return CHAT.members[(i + 1) % CHAT.members.length];
+}
+function swipe(dir) {
+  const m = CHAT.messages.at(-1);
+  if (busy || !m || m.role !== 'assistant') return;
+  const n = m.sw + dir;
+  if (n < 0) return;
+  if (n >= m.swipes.length) return generate('swipe');
+  if (CHAT.rpg) revertChanges(m.appliedS[m.sw]);
+  m.sw = n; m.content = m.swipes[n];
+  if (CHAT.rpg) m.appliedS[n] = applyChanges(m.appliedS[n] || []).applied;
+  saveChat(); renderMsgs(); renderRpgBar();
+}
+
+// ============================================================ prompts
+const LEN = {short:'1-2 short paragraphs', medium:'2-3 paragraphs', long:'4-6 rich, detailed paragraphs'};
+const DIFF = {easy:'Be forgiving: challenges are easy and failure is rarely deadly.', normal:'Balance challenge fairly.',
+  hard:'Be tough: enemies are dangerous and mistakes are punished.', brutal:'Be merciless: the world is deadly and death is a real possibility.'};
+const PACE = {slow:'Use a slow-burn pace: linger on atmosphere, dialogue and character moments.', balanced:'Balance action, dialogue and exploration.',
+  fast:'Keep the pace fast and get to the action quickly.'};
+const INT = {mild:'Keep violence and mature content mild and non-graphic.', moderate:'Mature themes are fine; keep graphic detail moderate.',
+  intense:'Vivid, intense and mature depictions are allowed.', extreme:'Unflinching, graphic depictions are allowed where the story calls for it.'};
+function memoryBlock(L) {
+  if (CHAT.summary) L.push('', '[Story so far]', CHAT.summary);
+  if (CHAT.notes) L.push('', '[Important notes to remember]', CHAT.notes);
+}
+function systemPrompt(sid) {
+  const o = CHAT.options, user = CHAT.persona.name || 'User';
+  if (CHAT.type === 'story') return storyPrompt();
+  const c = charInfo(sid), S = t => sub(t, c.name, user);
+  const L = [`You are ${c.name}. Write ${c.name}'s next reply in a fictional, never-ending roleplay chat with ${user}.`,
+    `Stay in character. Write actions in *asterisks* and speech in "quotes". ${o.pov === 'third' ? `Narrate ${c.name} in the third person. ` : ''}Never write ${user}'s words, actions or thoughts. Write ${LEN[o.length]} per reply. Be creative and proactive, and move the scene forward.`,
+    INT[o.intensity]];
+  if (o.events) L.push('Occasionally introduce surprises or complications.');
+  if (CHAT.type === 'group') {
+    const others = CHAT.members.filter(m => m !== sid).map(charInfo);
+    L.push('', `This is a group roleplay. Also present: ${others.map(x => `${x.name}${x.tagline ? ` (${x.tagline})` : ''}`).join('; ')}. Write only as ${c.name}; the others speak on their own turns.`);
+  }
+  L.push('', `[${c.name}]`);
+  [['Description', c.description], ['Personality', c.personality], ['Appearance', c.appearance], ['Role', c.class]].forEach(([k, v]) => { if (v) L.push(`${k}: ${S(v)}`); });
+  if (c.scenario) L.push('', '[Scenario]', S(c.scenario));
+  if (CHAT.persona.description) L.push('', `[${user}]`, S(CHAT.persona.description));
+  if (c.example_dialogue) L.push('', `[Example dialogue — shows ${c.name}'s voice, not real events]`, S(c.example_dialogue).replace(/<START>/gi, '').trim());
+  if (c.instructions) L.push('', S(c.instructions));
+  memoryBlock(L);
+  if (CHAT.rpg) L.push('', RPG_RULES);
+  L.push('', 'Any romantic or sexual content involves only adult characters (18+).');
+  return L.join('\n');
+}
+function storyPrompt() {
+  const st = CHAT.story, o = CHAT.options, p = CHAT.persona;
+  const pov = o.pov === 'third' ? `Narrate in third person, referring to the player's character as ${p.name || 'the hero'}.` : 'Narrate in second person ("you").';
+  const role = st.mode === 'dm'
+    ? `You are the Dungeon Master running a tabletop-style RPG for one player. ${pov} Write ${LEN[o.length]} per reply. Describe scenes, play all NPCs and monsters, and keep the adventure moving with hooks, combat, puzzles, shops, quests and loot. Never decide the player's actions, words or feelings. When an action's outcome is uncertain, ask for a roll and wait. Natural 20 is a critical success, natural 1 a fumble. End each reply by asking what they do.`
+    : `You are a collaborative storyteller in an immersive roleplay. ${pov} Write ${LEN[o.length]} per reply. Play every character except the player's, give each a distinct voice, follow the player's lead, add twists and emotional moments, and never speak or act for the player's character.`;
+  const desc = x => x.prompt ? `${x.name} (${x.prompt})` : x.name;
+  const L = [role, '', 'STORY:'];
+  if (st.title) L.push(`Title: ${st.title}`);
+  if (st.genres?.length) L.push('Genre: ' + st.genres.map(desc).join('; '));
+  if (st.tones?.length) L.push('Story type: ' + st.tones.map(desc).join('; '));
+  L.push('Setting: ' + (st.setting || 'Invent an original setting that fits the genre and story type.'));
+  L.push('Premise: ' + (st.premise || 'Invent a compelling hook and plot.'));
+  if (st.role) L.push(`The player's role: ${st.role}`);
+  if (st.characters?.length) {
+    L.push('Key characters (play them when they appear):');
+    st.characters.forEach(k => L.push(`- ${k.name}${k.role ? ` [${k.role}]` : ''}${k.cls ? `, ${k.cls}` : ''}: ${[k.appearance, k.personality, k.description].filter(Boolean).join(' ')}`));
+  }
+  L.push('', 'STYLE:', DIFF[o.difficulty], PACE[o.pacing], INT[o.intensity]);
+  if (o.events) L.push('Introduce occasional random events, complications and twists.');
+  if (st.instructions) L.push('Extra instructions: ' + st.instructions);
+  L.push('', 'PLAYER CHARACTER:', `Name: ${p.name || 'Unnamed'}${p.cls ? ` | Class: ${p.cls}` : ''}`);
+  if (p.description) L.push(`Background: ${p.description}`);
+  memoryBlock(L);
+  if (CHAT.rpg) L.push('', RPG_RULES, 'The player\'s current stats are in [Status] at the end of their latest message.');
+  L.push('', 'Any romantic or sexual content involves only adult characters (18+).');
+  return L.join('\n');
+}
+function worldInfo() {
+  const text = CHAT.messages.slice(-4).map(m => m.content || '').join('\n').toLowerCase();
+  const members = CHAT.members || [];
+  return LIB.lore.filter(e => e.enabled !== false && e.content &&
+      (!e.characters?.length || e.characters.some(id => members.includes(id))) &&
+      (!e.keys?.length || e.keys.some(k => k && text.includes(String(k).toLowerCase()))))
+    .map(e => '- ' + e.content).join('\n');
+}
+function buildMessages(sid, target, mode) {
+  const user = CHAT.persona.name || 'User', name = charInfo(sid).name;
+  const conv = CHAT.messages.filter(m => (m.role === 'user' || m.role === 'assistant') && m !== target && cleanText(m.content)).slice(-SET.history);
+  const out = conv.map(m => {
+    if (m.role === 'user') return {role:'user', content:m.content};
+    let t = stripThink(m.content).trim();
+    if (CHAT.type === 'group') t = `${charInfo(m.charId).name}: ${t}`;
+    return {role:'assistant', content:t};
+  });
+  if (mode === 'continue') {
+    out.push({role:'assistant', content:stripThink(target.content).trim()});
+    out.push({role:'user', content:`(Continue ${name}'s last message from exactly where it stopped, without repeating it.)`});
+  } else if (!out.length || out.at(-1).role !== 'user') {
+    let cue;
+    if (!conv.some(m => m.role === 'user')) {
+      if (CHAT.type === 'story') cue = (CHAT.story.mode === 'dm' ? 'Begin the adventure. Set the opening scene and give me a hook.' : 'Begin the story. Set the opening scene.') + (CHAT.story.opening ? `\nOpening: ${CHAT.story.opening}` : '');
+      else cue = `(Write ${name}'s opening message that starts the roleplay with ${user}.)`;
+    } else cue = CHAT.type === 'group' ? `(${name} speaks next.)` : '(Continue.)';
+    out.push({role:'user', content:cue});
+  }
+  const last = out.at(-1), extra = [];
+  const wi = worldInfo(); if (wi) extra.push('[World info:\n' + wi + ']');
+  if (CHAT.rpg) extra.push(statusLine());
+  if (CHAT.type === 'group') extra.push(`[Write only ${name}'s reply.]`);
+  extra.push('/no_think');
+  last.content += '\n\n' + extra.join('\n');
+  return [{role:'system', content:systemPrompt(sid)}, ...out];
+}
+
+// ============================================================ generation
+async function streamChat(messages, onToken) {
+  abortCtl = new AbortController();
+  const res = await fetch(API + '/chat/completions', {method:'POST', headers:{'Content-Type':'application/json'}, signal:abortCtl.signal,
+    body:JSON.stringify({model:SET.model || undefined, messages, temperature:+SET.temperature, max_tokens:+SET.maxTokens, stream:true, chat_template_kwargs:{enable_thinking:false}})});
+  if (!res.ok) throw new Error(res.status === 502 ? 'LM Studio is not reachable. Start its server and load a model.' : `HTTP ${res.status}: ${(await res.text()).slice(0, 160)}`);
+  const reader = res.body.getReader(), dec = new TextDecoder(); let buf = '', full = '';
+  while (true) {
+    const {done, value} = await reader.read(); if (done) break;
+    buf += dec.decode(value, {stream:true}); const lines = buf.split('\n'); buf = lines.pop();
+    for (const line of lines) {
+      const l = line.trim(); if (!l.startsWith('data:')) continue;
+      const d = l.slice(5).trim(); if (d === '[DONE]') continue;
+      try { const dl = JSON.parse(d).choices?.[0]?.delta || {}; if (dl.content) { full += dl.content; onToken(full); } else if (dl.reasoning_content || dl.reasoning) onToken(full, true); } catch (e) {}
+    }
+  }
+  return full;
+}
+async function generate(mode = 'new', speakerId = null) {
+  if (busy || !CHAT) return;
+  const chat = CHAT, msgs = chat.messages;
+  let target, prevSw = 0;
+  if (mode === 'new') {
+    speakerId = speakerId || pickSpeaker();
+    target = {id:rid(), role:'assistant', charId:speakerId, swipes:[''], sw:0, appliedS:[[]], content:''};
+    msgs.push(target);
+  } else {
+    target = msgs.at(-1); if (!target || target.role !== 'assistant') return;
+    speakerId = target.charId;
+    if (mode === 'swipe') {
+      prevSw = target.sw; if (chat.rpg) revertChanges(target.appliedS[target.sw]);
+      target.swipes.push(''); target.appliedS.push([]); target.sw = target.swipes.length - 1; target.content = '';
+    }
+  }
+  const prefix = mode === 'continue' ? target.content : '';
+  const payload = buildMessages(speakerId, target, mode);
+  setBusy(true); renderMsgs(true);
+  const txtEl = () => document.querySelector(`.m[data-id="${target.id}"] .txt`);
+  let latest = '';
+  const nameRe = new RegExp('^\\s*' + escRe(charInfo(speakerId).name) + '\\s*:\\s*');
+  const tidy = t => chat.type === 'group' ? t.replace(nameRe, '') : t;
+  try {
+    const text = await streamChat(payload, (full, thinking) => {
+      latest = full; const el = txtEl(); if (!el) return;
+      const shown = cleanText(prefix + tidy(full));
+      el.innerHTML = shown ? fmt(shown) : (thinking ? '<span class="muted small">Thinking…</span> ' : '') + '<span class="typing"><i></i><i></i><i></i></span>';
+      scrollDown();
+    });
+    const add = tidy(text);
+    if (!cleanText(add)) throw new Error('The model returned no text. Try again, or turn off "thinking" for this model in LM Studio.');
+    const final = mode === 'continue' ? prefix + (/\s$/.test(prefix) ? '' : ' ') + add.trim() : add;
+    target.swipes[target.sw] = final; target.content = final;
+    if (chat.rpg) {
+      const {applied, notes} = applyChanges(parseTags(add));
+      target.appliedS[target.sw] = mode === 'continue' ? [...(target.appliedS[target.sw] || []), ...applied] : applied;
+      notes.forEach(n => msgs.push({id:rid(), role:'note', content:n}));
+    }
+  } catch (e) {
+    if (e.name === 'AbortError' && cleanText(latest)) {
+      const final = mode === 'continue' ? prefix + ' ' + tidy(latest).trim() : tidy(latest);
+      target.swipes[target.sw] = final; target.content = final;
+    } else {
+      if (mode === 'new') msgs.splice(msgs.indexOf(target), 1);
+      else if (mode === 'swipe') {
+        target.swipes.pop(); target.appliedS.pop(); target.sw = prevSw; target.content = target.swipes[prevSw];
+        if (chat.rpg) target.appliedS[prevSw] = applyChanges(target.appliedS[prevSw] || []).applied;
+      }
+      if (e.name !== 'AbortError') toast('⚠ ' + e.message, 4500);
+    }
+  }
+  abortCtl = null; setBusy(false); saveChat(chat);
+  if (chat === CHAT) { renderMsgs(); renderRpgBar(); }
+  maybeSummarize(chat);
+}
+let summarizing = false;
+async function maybeSummarize(chat = CHAT, force = false) {
+  if (!chat || summarizing || (!SET.autoSummary && !force)) return;
+  const conv = chat.messages.filter(m => (m.role === 'user' || m.role === 'assistant') && cleanText(m.content));
+  const end = force ? conv.length : conv.length - SET.history;
+  if (end - chat.sumIdx < (force ? 1 : 8)) { if (force) toast('Nothing new to summarize'); return; }
+  const prevChat = CHAT; CHAT = chat;                     // charInfo() reads CHAT
+  const text = conv.slice(chat.sumIdx, end).map(m => `${m.role === 'user' ? (chat.persona.name || 'User') : charInfo(m.charId).name}: ${cleanText(m.content)}`).join('\n\n');
+  CHAT = prevChat;
+  summarizing = true; if (force) toast('Updating memory…');
+  try {
+    const r = await fetch(API + '/chat/completions', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({
+      model:SET.model || undefined, temperature:0.3, max_tokens:700, stream:false, chat_template_kwargs:{enable_thinking:false},
+      messages:[{role:'system', content:'You keep the long-term memory of an ongoing roleplay. Merge the new events into the existing summary. Keep names, relationships, feelings, promises, items, places and unresolved threads. Past tense, under 250 words. Output only the summary.'},
+        {role:'user', content:`Existing summary:\n${chat.summary || '(none yet)'}\n\nNew events:\n${text}\n/no_think`}]})});
+    const j = await r.json(); const s = cleanText(j.choices?.[0]?.message?.content || '');
+    if (s) { chat.summary = s; chat.sumIdx = end; saveChat(chat); if (force || chat === CHAT) toast('🧠 Memory updated'); }
+  } catch (e) { if (force) toast('Could not update memory'); }
+  summarizing = false;
+}
+
+// ============================================================ message actions
+function msgMenu(id, anchor) {
+  if (busy) return;
+  const msgs = CHAT.messages, m = msgs.find(x => x.id === id); if (!m) return;
+  const isLast = m === msgs.at(-1), items = [['✏️ Edit', () => editMsg(m)], ['📋 Copy', () => { navigator.clipboard?.writeText(cleanText(m.content)); toast('Copied'); }]];
+  if (m.role === 'assistant' && isLast) items.push(['🔄 New reply', () => generate('swipe')], ['➕ Continue', () => generate('continue')]);
+  if (m.role === 'user' && isLast) items.push(['💬 Get reply', () => generate('new')]);
+  items.push(['🗑 Delete', () => { if (CHAT.rpg && m.role === 'assistant') revertChanges(m.appliedS[m.sw]); msgs.splice(msgs.indexOf(m), 1); saveChat(); renderMsgs(); renderRpgBar(); }]);
+  if (m.role !== 'note' && !isLast) items.push(['✂️ Delete everything after', () => {
+    if (!confirm('Delete all messages after this one?')) return;
+    const cut = msgs.splice(msgs.indexOf(m) + 1);
+    if (CHAT.rpg) cut.reverse().forEach(x => x.role === 'assistant' && revertChanges(x.appliedS[x.sw]));
+    saveChat(); renderMsgs(); renderRpgBar(); }]);
+  showPop(anchor, items);
+}
+function editMsg(m) {
+  const el = document.querySelector(`.m[data-id="${m.id}"] .txt`); if (!el) return;
+  el.innerHTML = `<div class="editbox"><textarea>${esc(m.content)}</textarea><div class="btns"><button data-x="c">Cancel</button><button class="primary" data-x="s">Save</button></div></div>`;
+  const ta = el.querySelector('textarea'); ta.focus();
+  el.querySelector('[data-x=c]').onclick = e => { e.stopPropagation(); renderMsgs(); };
+  el.querySelector('[data-x=s]').onclick = e => { e.stopPropagation(); m.content = ta.value; if (m.role === 'assistant') m.swipes[m.sw] = ta.value; saveChat(); renderMsgs(); };
+}
+
+// ============================================================ chat menu & sheets
+function openChatMenu() {
+  const c = CHAT, items = [
+    ['🧠', 'Memory & notes', openMemorySheet],
+    ['⚙️', 'Chat settings', openChatSettings],
+    ['🙂', 'My persona in this chat', openPersonaPicker],
+  ];
+  if (c.rpg) items.push(['🎲', 'Character sheet', openStatSheet]);
+  if (c.type === 'char') items.push(['✏️', 'Edit character', () => go('#/edit/characters/' + c.members[0])]);
+  if (c.type === 'group') items.push(['👥', 'Add or remove characters', openMembersSheet]);
+  items.push(['📖', 'Lorebook', () => go('#/lib/lore')], ['🏷️', 'Rename chat', () => { const t = prompt('Chat name', chatTitle()); if (t !== null) { c.title = t.trim(); saveChat(); renderChatView(); } }],
+    ['💾', 'Export chat', () => download(`${chatTitle().replace(/\W+/g, '_')}.json`, JSON.stringify(c, null, 2))],
+    ['🗑', 'Delete chat', async () => { if (confirm('Delete this chat?')) { await api('/api/save/' + encodeURIComponent(c.id), {method:'DELETE'}); CHAT = null; go('#/chats'); } }, 'danger']);
+  openSheet(`<h3>${esc(chatTitle())}</h3><div class="menu-list">${items.map((it, i) => `<button data-i="${i}" class="${it[3] || ''}"><span>${it[0]}</span>${it[1]}</button>`).join('')}</div>`);
+  $('sheetBody').querySelectorAll('[data-i]').forEach(b => b.onclick = () => { closeSheet(); items[+b.dataset.i][2](); });
+}
+function download(name, text) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], {type:'application/json'})); a.download = name; a.click(); }
+function openMemorySheet() {
+  openSheet(`<h3>Memory</h3>
+    <div class="field"><label>Story so far (updated automatically as the chat grows)</label><textarea id="memSum" rows="7">${esc(CHAT.summary)}</textarea></div>
+    <div class="field"><label>Pinned notes — always remembered</label><textarea id="memNotes" rows="4" placeholder="e.g. We are married. Grax owes me 50 gold.">${esc(CHAT.notes)}</textarea></div>
+    <div class="btnrow"><button id="memNow">🧠 Summarize now</button><button onclick="closeSheet()">Cancel</button><button class="primary" id="memSave">Save</button></div>`);
+  $('memSave').onclick = () => { CHAT.summary = $('memSum').value.trim(); CHAT.notes = $('memNotes').value.trim(); saveChat(); closeSheet(); toast('Saved'); };
+  $('memNow').onclick = async () => { CHAT.summary = $('memSum').value.trim(); CHAT.notes = $('memNotes').value.trim(); closeSheet(); await maybeSummarize(CHAT, true); };
+}
+function selHtml(id, opts, val) { return `<select id="${id}">${opts.map(([k, l]) => `<option value="${esc(k)}" ${k === val ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>`; }
+const POV_OPTS = [['second', '2nd person (you)'], ['third', '3rd person']], LEN_OPTS = [['short', 'Short'], ['medium', 'Medium'], ['long', 'Long']];
+const DIFF_OPTS = [['easy', 'Easy'], ['normal', 'Normal'], ['hard', 'Hard'], ['brutal', 'Brutal']], PACE_OPTS = [['slow', 'Slow burn'], ['balanced', 'Balanced'], ['fast', 'Fast']];
+const INT_OPTS = [['mild', 'Mild'], ['moderate', 'Moderate'], ['intense', 'Intense'], ['extreme', 'Extreme']];
+function openChatSettings() {
+  const o = CHAT.options, story = CHAT.type === 'story';
+  openSheet(`<h3>Chat settings</h3><div class="formgrid">
+    ${story ? `<div class="field"><label>Mode</label>${selHtml('csMode', [['dm', 'Dungeon Master'], ['story', 'Story roleplay']], CHAT.story.mode)}</div>` : ''}
+    <div class="field"><label>Reply length</label>${selHtml('csLen', LEN_OPTS, o.length)}</div>
+    <div class="field"><label>Point of view</label>${selHtml('csPov', POV_OPTS, o.pov)}</div>
+    <div class="field"><label>Content intensity</label>${selHtml('csInt', INT_OPTS, o.intensity)}</div>
+    ${story ? `<div class="field"><label>Difficulty</label>${selHtml('csDiff', DIFF_OPTS, o.difficulty)}</div><div class="field"><label>Pacing</label>${selHtml('csPace', PACE_OPTS, o.pacing)}</div>` : ''}
+    </div>
+    <label class="check"><input type="checkbox" id="csEvents" ${o.events ? 'checked' : ''}> Random events &amp; twists</label>
+    <label class="check"><input type="checkbox" id="csRpg" ${CHAT.rpg ? 'checked' : ''}> 🎲 RPG mode — dice, gold, XP, HP &amp; items</label>
+    <div class="btnrow"><button onclick="closeSheet()">Cancel</button><button class="primary" id="csSave">Save</button></div>`);
+  $('csSave').onclick = () => {
+    Object.assign(o, {length:$('csLen').value, pov:$('csPov').value, intensity:$('csInt').value, events:$('csEvents').checked});
+    if (story) { CHAT.story.mode = $('csMode').value; o.difficulty = $('csDiff').value; o.pacing = $('csPace').value; }
+    CHAT.rpg = $('csRpg').checked; o.stats = CHAT.rpg; saveChat(); closeSheet(); renderChatView();
+  };
+}
+function openPersonaPicker() {
+  openSheet(`<h3>Who are you in this chat?</h3>${LIB.personas.map(p => `<label class="check"><input type="radio" name="pp" value="${esc(p.id)}" ${p.name === CHAT.persona.name ? 'checked' : ''}> ${avatar(p.avatar, p.name, 34)} <span><b>${esc(p.name)}</b><br><span class="muted small">${esc((p.description || '').slice(0, 80))}</span></span></label>`).join('')}
+    <div class="btnrow"><button onclick="closeSheet();go('#/edit/personas/new')">+ New persona</button><button class="primary" id="ppSave">Use</button></div>`);
+  $('ppSave').onclick = () => {
+    const p = LIB.personas.find(x => x.id === $('sheetBody').querySelector('input:checked')?.value); if (!p) return closeSheet();
+    CHAT.persona = {...CHAT.persona, name:p.name, avatar:p.avatar || '', description:p.description || ''}; saveChat(); closeSheet(); renderChatView();
+  };
+}
+function openMembersSheet() {
+  const chars = LIB.characters.filter(c => !/player/i.test(c.role || ''));
+  openSheet(`<h3>Characters in this chat</h3>${chars.map(c => `<label class="check"><input type="checkbox" value="${esc(c.id)}" ${CHAT.members.includes(c.id) ? 'checked' : ''}> ${avatar(c.avatar, c.name, 32)} ${esc(c.name)}</label>`).join('')}
+    <div class="btnrow"><button onclick="closeSheet()">Cancel</button><button class="primary" id="mbSave">Save</button></div>`);
+  $('mbSave').onclick = () => {
+    const ids = [...$('sheetBody').querySelectorAll('input:checked')].map(i => i.value);
+    if (ids.length < 2) return toast('A group needs at least two characters');
+    CHAT.members = ids; ids.forEach(id => CHAT.cast[id] = snap(charById(id))); saveChat(); closeSheet(); renderChatView();
+  };
+}
+function openStatSheet() {
+  const c = CHAT.stats, next = xpFor(c.level + 1), prev = xpFor(c.level);
+  const pct = Math.min(100, Math.round((c.xp - prev) / (next - prev) * 100)), hp = Math.round(c.hp / c.maxHp * 100);
+  openSheet(`<h3>${esc(CHAT.persona.name || 'You')}</h3>
+    <div class="sheetstat"><div><span class="muted small">Level</span><br><b>${c.level}</b></div><div style="text-align:right"><span class="muted small">XP</span><br><b style="color:var(--xp)">${c.xp}</b> <span class="muted small">/ ${next}</span></div><button data-adj="XP">±</button></div>
+    <div class="bar"><div style="width:${pct}%"></div></div>
+    <div class="sheetstat"><div><span class="muted small">Health</span><br><b style="color:${c.hp ? 'var(--good)' : 'var(--bad)'}">${c.hp}</b> <span class="muted small">/ ${c.maxHp}</span></div><button data-adj="HP">±</button></div>
+    <div class="bar hp"><div style="width:${hp}%"></div></div>
+    <div class="sheetstat"><div><span class="muted small">Gold</span><br><b style="color:var(--accent)">🪙 ${c.gold}</b></div><button data-adj="GOLD">±</button></div>
+    <h4>Inventory</h4><ul class="inv">${c.inventory.map((it, i) => `<li><span>${esc(it.name)}${it.qty > 1 ? ` <span class="muted">×${it.qty}</span>` : ''}</span><button data-use="${i}">−</button></li>`).join('') || '<li class="muted">Empty</li>'}</ul>
+    <div style="display:flex;gap:6px"><input id="newItem" placeholder="Add item"><button id="addItem">+</button></div>
+    <div class="btnrow"><button class="primary" onclick="closeSheet()">Done</button></div>`);
+  const redo = () => { saveChat(); renderRpgBar(); openStatSheet(); };
+  $('sheetBody').querySelectorAll('[data-adj]').forEach(b => b.onclick = () => {
+    const n = parseInt(prompt(`Change ${b.dataset.adj} by (e.g. 50 or -10):`)); if (!isNaN(n) && n) { applyChanges([{type:b.dataset.adj, n}]); redo(); } });
+  $('sheetBody').querySelectorAll('[data-use]').forEach(b => b.onclick = () => { applyChanges([{type:'ITEM', name:c.inventory[+b.dataset.use].name, qty:-1}]); redo(); });
+  const add = () => { const v = $('newItem').value.trim(); if (v) { applyChanges(parseTags(`[ITEM:+${v}]`)); redo(); } };
+  $('addItem').onclick = add; $('newItem').onkeydown = e => { if (e.key === 'Enter') add(); };
+}
+function openSheet(html) { $('sheetBody').innerHTML = html; $('sheet').classList.add('open'); }
+function closeSheet() { $('sheet').classList.remove('open'); }
+$('sheet').addEventListener('click', e => { if (e.target.id === 'sheet') closeSheet(); });
+function showPop(anchor, items) {
+  const p = $('pop');
+  p.innerHTML = items.map((it, i) => `<button data-i="${i}">${it[0]}</button>`).join('');
+  p.querySelectorAll('button').forEach(b => b.onclick = e => { e.stopPropagation(); closePop(); items[+b.dataset.i][1](); });
+  p.classList.add('open');
+  const r = anchor.getBoundingClientRect(), w = p.offsetWidth, h = p.offsetHeight;
+  p.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left)) + 'px';
+  p.style.top = (r.bottom + h + 8 < innerHeight ? r.bottom + 4 : Math.max(8, r.top - h - 4)) + 'px';
+  document.removeEventListener('click', popOutside);
+  setTimeout(() => document.addEventListener('click', popOutside), 0);
+}
+function popOutside(e) { if (!$('pop').contains(e.target)) closePop(); }
+function closePop() { $('pop').classList.remove('open'); document.removeEventListener('click', popOutside); }
+
+// ============================================================ story setup
+let SETUP = null;
+function blankSetup() { const p = activePersona();
+  return {template:'', title:'', mode:'dm', genres:new Set(), tones:new Set(), chars:new Set(), setting:'', premise:'', opening:'', role:'',
+    pname:p.name || '', pcls:'', pback:p.description || '', gold:25, options:{...OPT_DEFAULT}, instructions:''}; }
+async function openStorySetup(id) { await loadLib(); SETUP = blankSetup(); if (id) applyTemplate(id, true); renderSetup(); }
+function togs(list, set, group, nameKey = 'name') {
+  if (!list.length) return '<span class="muted small">None yet — add some under Me → Library.</span>';
+  return list.map(it => `<span class="tag ${set.has(it.id) ? 'on' : ''}" data-g="${group}" data-id="${esc(it.id)}" title="${esc(it.prompt || it.description || '')}">${esc(it[nameKey] || '?')}</span>`).join('');
+}
+function renderSetup() {
+  const S = SETUP, o = S.options, others = LIB.characters.filter(c => !/player/i.test(c.role || '')), players = LIB.characters.filter(c => /player/i.test(c.role || ''));
+  openSheet(`<h3>${S.template ? esc(S.title || 'Story') : 'Custom story'}</h3>
+    <div class="formgrid"><div class="field"><label>Title</label><input id="nTitle" value="${esc(S.title)}" placeholder="Untitled adventure"></div>
+      <div class="field"><label>Mode</label>${selHtml('nMode', [['dm', 'Dungeon Master'], ['story', 'Story roleplay']], S.mode)}</div></div>
+    <h4>Genre</h4><div class="togs">${togs(LIB.genres, S.genres, 'genres')}</div>
+    <h4>Story type</h4><div class="togs">${togs(LIB.tones, S.tones, 'tones')}</div>
+    <h4>World</h4>
+    <div class="field"><label>Setting</label><textarea id="nSetting" rows="2" placeholder="Leave blank and the AI invents one">${esc(S.setting)}</textarea></div>
+    <div class="field"><label>Premise / plot hook</label><textarea id="nPremise" rows="2" placeholder="Leave blank and the AI invents one">${esc(S.premise)}</textarea></div>
+    <div class="field"><label>Opening scene</label><textarea id="nOpening" rows="2" placeholder="Optional">${esc(S.opening)}</textarea></div>
+    <h4>Characters in the story</h4><div class="togs">${togs(others, S.chars, 'chars')}</div>
+    <h4>Your character</h4>
+    ${players.length ? `<div class="field"><label>Use a saved character</label>${selHtml('nPlayer', [['', 'Custom'], ...players.map(p => [p.id, p.name])], '')}</div>` : ''}
+    <div class="formgrid"><div class="field"><label>Name</label><input id="nPName" value="${esc(S.pname)}"></div>
+      <div class="field"><label>Class / job</label><input id="nPCls" value="${esc(S.pcls)}" placeholder="Rogue, Mage…"></div>
+      <div class="field"><label>Starting gold</label><input id="nGold" type="number" min="0" value="${S.gold}"></div></div>
+    <div class="field"><label>Your role in the story</label><input id="nRole" value="${esc(S.role)}" placeholder="e.g. a new recruit in the city watch"></div>
+    <div class="field"><label>Background</label><textarea id="nPBack" rows="2">${esc(S.pback)}</textarea></div>
+    <h4>Options</h4>
+    <div class="formgrid"><div class="field"><label>Point of view</label>${selHtml('nPov', POV_OPTS, o.pov)}</div>
+      <div class="field"><label>Reply length</label>${selHtml('nLen', LEN_OPTS, o.length)}</div>
+      <div class="field"><label>Difficulty</label>${selHtml('nDiff', DIFF_OPTS, o.difficulty)}</div>
+      <div class="field"><label>Pacing</label>${selHtml('nPace', PACE_OPTS, o.pacing)}</div>
+      <div class="field"><label>Content intensity</label>${selHtml('nInt', INT_OPTS, o.intensity)}</div></div>
+    <label class="check"><input type="checkbox" id="nEvents" ${o.events ? 'checked' : ''}> Random events &amp; twists</label>
+    <label class="check"><input type="checkbox" id="nStats" ${o.stats ? 'checked' : ''}> 🎲 RPG mode — gold, XP, HP &amp; items</label>
+    <div class="field" style="margin-top:8px"><label>Extra instructions for the AI</label><textarea id="nInstr" rows="2">${esc(S.instructions)}</textarea></div>
+    <div class="btnrow"><button id="surpriseBtn">🎲 Surprise me</button><button onclick="closeSheet()">Cancel</button><button class="primary" id="startBtn">Start</button></div>`);
+  $('sheetBody').querySelectorAll('.tag[data-g]').forEach(b => b.onclick = () => { const set = S[b.dataset.g], id = b.dataset.id; set.has(id) ? set.delete(id) : set.add(id); b.classList.toggle('on', set.has(id)); });
+  if ($('nPlayer')) $('nPlayer').onchange = e => { const p = charById(e.target.value); if (!p) return;
+    $('nPName').value = p.name || ''; $('nPCls').value = p.class || ''; $('nPBack').value = [p.appearance, p.personality, p.description].filter(Boolean).join(' '); };
+  $('surpriseBtn').onclick = surprise; $('startBtn').onclick = startStory;
+}
+function readSetup() {
+  const v = id => $(id).value.trim(), S = SETUP;
+  Object.assign(S, {title:v('nTitle'), mode:$('nMode').value, setting:v('nSetting'), premise:v('nPremise'), opening:v('nOpening'), role:v('nRole'),
+    pname:v('nPName'), pcls:v('nPCls'), pback:v('nPBack'), gold:Math.max(0, parseInt($('nGold').value) || 0), instructions:v('nInstr'),
+    options:{pov:$('nPov').value, length:$('nLen').value, difficulty:$('nDiff').value, pacing:$('nPace').value, intensity:$('nInt').value, events:$('nEvents').checked, stats:$('nStats').checked}});
+}
+function applyTemplate(id, fresh) {
+  const t = LIB.stories.find(s => s.id === id); if (!t) return;
+  Object.assign(SETUP, {template:id, title:t.title || '', mode:t.mode || 'dm', setting:t.setting || '', premise:t.premise || '', opening:t.opening || '', role:t.role || '', instructions:t.instructions || ''});
+  SETUP.genres = new Set(t.genres || []); SETUP.tones = new Set(t.tones || []); SETUP.chars = new Set(t.characters || []);
+  if (t.rpg === false) SETUP.options.stats = false;
+}
+function surprise() {
+  readSetup(); const pick = (arr, n) => arr.slice().sort(() => Math.random() - .5).slice(0, n);
+  Object.assign(SETUP, {template:'', title:'', setting:'', premise:'', opening:'', role:'', chars:new Set()});
+  SETUP.genres = new Set(pick(LIB.genres, 1).map(g => g.id));
+  SETUP.tones = new Set(pick(LIB.tones.filter(t => !/sexual|adult/i.test(t.name || '')), 1 + Math.floor(Math.random() * 2)).map(t => t.id));
+  renderSetup();
+}
+function startStory() {
+  readSetup(); const S = SETUP, pickIds = (list, set) => list.filter(x => set.has(x.id)), p = activePersona();
+  const story = {title:S.title || 'Untitled adventure', template:S.template, mode:S.mode,
+    genres:pickIds(LIB.genres, S.genres).map(g => ({name:g.name, prompt:g.prompt || ''})), tones:pickIds(LIB.tones, S.tones).map(t => ({name:t.name, prompt:t.prompt || ''})),
+    setting:S.setting, premise:S.premise, opening:S.opening, role:S.role,
+    characters:pickIds(LIB.characters, S.chars).map(c => ({id:c.id, name:c.name, role:c.role, cls:c.class, appearance:c.appearance, personality:c.personality, description:c.description})),
+    instructions:S.instructions};
+  const chat = {id:newId(), type:'story', title:'', members:story.characters.map(c => c.id), cast:{}, story, options:S.options, rpg:S.options.stats,
+    persona:{name:S.pname || p.name, avatar:p.avatar || '', description:S.pback, cls:S.pcls}, stats:{...structuredClone(STATS_DEFAULT), gold:S.gold},
+    summary:'', notes:'', sumIdx:0, messages:[], updatedAt:0};
+  CHAT = chat; saveChat(chat, true); closeSheet(); go('#/chat/' + chat.id);
+}
+
+// ============================================================ me / settings / library
+async function viewMe() {
+  await loadLib(); await loadSettings();
+  const ap = activePersona();
+  $('view').innerHTML = `<div class="wrap" style="max-width:720px">
+    <div class="topbar"><h1>Me</h1></div>
+    <h2 class="sec">Persona</h2>
+    <div class="list">${LIB.personas.map(p => `<div class="row" data-pid="${esc(p.id)}">${avatar(p.avatar, p.name, 44)}<div class="mid"><div class="ttl">${esc(p.name)} ${p.id === ap.id ? '<span class="tag on" style="font-size:11px;padding:1px 8px">Active</span>' : ''}</div><div class="sub">${esc(p.description || 'No description')}</div></div><button class="ghost" data-pedit="${esc(p.id)}">Edit</button></div>`).join('')}</div>
+    <div class="btnrow left"><button onclick="go('#/edit/personas/new')">+ New persona</button></div>
+    <h2 class="sec">AI model</h2>
+    <div class="field"><div id="lmStatus" class="small muted">Checking LM Studio…</div></div>
+    <div class="field"><label>Model</label><select id="sModel"><option value="">(LM Studio's loaded model)</option></select></div>
+    <div class="formgrid">
+      <div class="field"><label>Creativity (temperature)</label><input id="sTemp" type="number" step="0.05" min="0" max="2" value="${SET.temperature}"></div>
+      <div class="field"><label>Max reply length (tokens)</label><input id="sMax" type="number" step="50" min="100" value="${SET.maxTokens}"></div>
+      <div class="field"><label>Messages sent as context</label><input id="sHist" type="number" min="4" max="200" value="${SET.history}"></div></div>
+    <label class="check"><input type="checkbox" id="sSum" ${SET.autoSummary ? 'checked' : ''}> 🧠 Long-term memory — summarize older messages automatically</label>
+    <div class="btnrow left"><button class="primary" id="sSave">Save settings</button></div>
+    <h2 class="sec">Library</h2>
+    <div class="list">${[['characters', '🎭', 'Characters'], ['stories', '📜', 'Stories'], ['lore', '📖', 'Lorebook'], ['personas', '🙂', 'Personas'], ['genres', '🗺️', 'Genres'], ['tones', '🎬', 'Story types']]
+      .map(([k, i, l]) => `<div class="row" data-lib="${k}"><span style="font-size:22px;width:44px;text-align:center">${i}</span><div class="mid"><div class="ttl">${l}</div><div class="sub">${LIB[k].length} item${LIB[k].length === 1 ? '' : 's'}</div></div><span class="muted">›</span></div>`).join('')}</div>
+    <div class="btnrow left"><button id="impBtn2">⇪ Import character cards</button></div>
+    <h2 class="sec">Install on your phone</h2>
+    <p class="muted small">Open this page in Chrome on your phone, tap ⋮ → <b>Add to Home screen</b>. For a full-screen app with no browser bar, use an HTTPS address: on the PC run <code>sudo tailscale serve --bg 8090</code> and open the <code>https://…ts.net</code> address it shows.</p>
+  </div>`;
+  $('view').querySelectorAll('[data-pid]').forEach(r => r.onclick = e => { if (e.target.closest('[data-pedit]')) return; SET.personaId = r.dataset.pid; saveSettings(); viewMe(); });
+  $('view').querySelectorAll('[data-pedit]').forEach(b => b.onclick = () => go('#/edit/personas/' + b.dataset.pedit));
+  $('view').querySelectorAll('[data-lib]').forEach(r => r.onclick = () => go('#/lib/' + r.dataset.lib));
+  $('impBtn2').onclick = () => $('importFile').click();
+  $('sSave').onclick = () => { Object.assign(SET, {model:$('sModel').value, temperature:+$('sTemp').value || 0.85, maxTokens:+$('sMax').value || 1200,
+    history:+$('sHist').value || 30, autoSummary:$('sSum').checked}); saveSettings(); toast('Settings saved'); };
+  try {
+    const j = await api(API + '/models'); const ids = (j.data || []).map(m => m.id).filter(id => !/embed/i.test(id));
+    $('sModel').innerHTML = `<option value="">(LM Studio's loaded model)</option>` + ids.map(id => `<option ${id === SET.model ? 'selected' : ''}>${esc(id)}</option>`).join('');
+    $('lmStatus').innerHTML = `<span class="status-ok">● Connected to LM Studio</span> — ${ids.length} model(s)`;
+  } catch (e) { $('lmStatus').innerHTML = `<span class="status-bad">● LM Studio not reachable</span> — start its server and load a model.`; }
+}
+const LIB_META = {
+  characters:{title:'Characters', one:'character', key:'name', fields:[['avatar', 'Avatar', 'image'], ['name', 'Name', 'text'], ['tagline', 'Tagline', 'text', 'One line shown on the card'], ['tags', 'Tags', 'tags'],
+    ['description', 'Description', 'textarea', 'Who they are. Use {{char}} and {{user}} for names.'], ['personality', 'Personality', 'textarea'], ['appearance', 'Appearance', 'textarea'],
+    ['scenario', 'Scenario', 'textarea', 'The situation the chat starts in'], ['greeting', 'First message', 'textarea'], ['alt_greetings', 'Other first messages (swipeable)', 'textlist'],
+    ['example_dialogue', 'Example dialogue', 'textarea', 'How they talk, e.g. {{user}}: Hi\\n{{char}}: *waves* "Hey!"'], ['instructions', 'Extra instructions for the AI', 'textarea'],
+    ['role', 'Role', 'select', [['NPC', 'NPC'], ['Companion', 'Companion'], ['Villain', 'Villain'], ['Player', 'Player (for stories)']]], ['class', 'Class / job', 'text'],
+    ['rpg', 'RPG mode', 'toggle', 'Dice, gold, XP and HP in chats with this character']]},
+  personas:{title:'Personas', one:'persona', key:'name', fields:[['avatar', 'Avatar', 'image'], ['name', 'Name', 'text'], ['description', 'About you', 'textarea', 'What characters should know about you']]},
+  stories:{title:'Stories', one:'story', key:'title', fields:[['cover', 'Cover image', 'image'], ['title', 'Title', 'text'], ['tags', 'Tags', 'tags'], ['mode', 'Mode', 'select', [['dm', 'Dungeon Master'], ['story', 'Story roleplay']]], ['genres', 'Genres', 'checks', 'genres'],
+    ['tones', 'Story types', 'checks', 'tones'], ['setting', 'Setting', 'textarea'], ['premise', 'Premise / hook', 'textarea'], ['opening', 'Opening scene', 'textarea'], ['role', "Player's role", 'text'],
+    ['characters', 'Characters', 'checks', 'characters'], ['instructions', 'Extra instructions', 'textarea'], ['rpg', 'RPG mode', 'toggle', 'Gold, XP, HP and dice']]},
+  lore:{title:'Lorebook', one:'lore entry', key:'name', hint:'When a trigger word comes up in the chat, the entry is given to the AI. No trigger words = always included. No characters ticked = every chat.',
+    fields:[['name', 'Name', 'text'], ['book', 'Lorebook', 'text', 'Groups entries together, e.g. "Ashford" or "Star Wars"'], ['keys', 'Trigger words', 'tags', 'Leave empty to always include it'], ['content', 'What the AI should know', 'textarea'], ['characters', 'Only for these characters', 'checks', 'characters'], ['enabled', 'Enabled', 'toggle', 'Use this entry']]},
+  genres:{title:'Genres', one:'genre', key:'name', fields:[['image', 'Image', 'image'], ['name', 'Name', 'text'], ['prompt', 'Description for the AI', 'textarea', 'What this world is like. This is sent to the AI.']]},
+  tones:{title:'Story types', one:'story type', key:'name', fields:[['image', 'Image', 'image'], ['name', 'Name', 'text'], ['prompt', 'Description for the AI', 'textarea', 'How the AI should play this kind of story.']]},
+};
+async function viewLib(section) {
+  const meta = LIB_META[section]; if (!meta) return go('#/me');
+  await loadLib();
+  const items = LIB[section];
+  $('view').innerHTML = `<div class="wrap" style="max-width:720px">
+    <div class="topbar sub"><button class="icon ghost" onclick="go('#/me')">‹</button><h1>${meta.title}</h1><button class="primary" onclick="go('#/edit/${section}/new')">+ New</button></div>
+    ${meta.hint ? `<p class="muted small">${meta.hint}</p>` : ''}
+    <div class="list">${items.length ? items.map(it => `<div class="row" data-id="${esc(it.id)}">${'avatar' in it || section === 'characters' || section === 'personas' ? avatar(it.avatar, it[meta.key], 40) : ''}
+      <div class="mid"><div class="ttl">${esc(it[meta.key] || '(untitled)')}${it.enabled === false ? ' <span class="muted small">(off)</span>' : ''}</div><div class="sub">${esc(it.tagline || it.description || it.prompt || it.premise || it.content || (it.keys || []).join(', ') || '')}</div></div><span class="muted">›</span></div>`).join('')
+      : `<div class="empty"><b>📭</b>Nothing here yet.</div>`}</div>
+    ${section === 'characters' ? `<div class="btnrow left"><button onclick="$('importFile').click()">⇪ Import character cards</button></div>` : ''}</div>`;
+  $('view').querySelectorAll('[data-id]').forEach(r => r.onclick = () => go(`#/edit/${section}/${r.dataset.id}`));
+}
+let EDIT = null;
+async function viewEdit(section, id) {
+  const meta = LIB_META[section]; if (!meta) return go('#/me');
+  await loadLib();
+  const isNew = id === 'new';
+  const defaults = {characters:{tags:[], alt_greetings:[], role:'NPC', rpg:false}, lore:{enabled:true, keys:[], characters:[], book:discoverTab === 'lore' ? discoverTag : ''}, stories:{mode:'dm', tags:[], genres:[], tones:[], characters:[], rpg:true}}[section] || {};
+  EDIT = isNew ? structuredClone(defaults) : structuredClone(LIB[section].find(x => x.id === id) || {});
+  if (!isNew && !EDIT.id) return go('#/lib/' + section);
+  $('view').innerHTML = `<div class="wrap" style="max-width:720px">
+    <div class="topbar sub"><button class="icon ghost" onclick="history.back()">‹</button><h1>${isNew ? 'New' : 'Edit'} ${meta.one}</h1></div>
+    <div id="form">${meta.fields.map(f => fieldHtml(f)).join('')}</div>
+    <div class="btnrow">${isNew ? '' : '<button class="danger" id="delBtn">Delete</button>'}<button onclick="history.back()">Cancel</button><button class="primary" id="saveBtn">Save</button></div></div>`;
+  wireFields(meta.fields);
+  $('saveBtn').onclick = async () => {
+    readFields(meta.fields);
+    if (!String(EDIT[meta.key] || '').trim()) return toast('Please give it a name');
+    try { const saved = await post('/api/library/' + section, EDIT); await loadLib(); toast('Saved');
+      if (isNew && section === 'characters') return go('#/char/' + saved.id);
+      if (isNew && section === 'stories') return go('#/story/' + saved.id);
+      history.back(); } catch (e) { toast('⚠ ' + e.message); }
+  };
+  if ($('delBtn')) $('delBtn').onclick = async () => { if (!confirm('Delete this?')) return; await api(`/api/library/${section}/${id}`, {method:'DELETE'}); await loadLib(); go({characters:'#/discover/characters', stories:'#/discover/stories', lore:'#/discover/lore', genres:'#/discover/genres', tones:'#/discover/genres'}[section] || '#/lib/' + section); };
+}
+function fieldHtml([k, label, type, extra]) {
+  const v = EDIT[k], hint = typeof extra === 'string' && type !== 'checks' ? `<div class="hint">${esc(extra)}</div>` : '';
+  switch (type) {
+    case 'image': return `<div class="field"><label>${label}</label><div class="imgfield"><span id="f_${k}_pv">${avatar(v, EDIT.name || EDIT.title || '?', 84)}</span>
+      <label class="tag" style="cursor:pointer">Choose image<input type="file" accept="image/*" id="f_${k}" style="display:none"></label><button class="ghost small" id="f_${k}_clr">Remove</button></div></div>`;
+    case 'textarea': return `<div class="field"><label>${label}</label><textarea id="f_${k}" rows="${k === 'description' || k === 'content' ? 5 : 3}">${esc(v || '')}</textarea>${hint}</div>`;
+    case 'tags': return `<div class="field"><label>${label}</label><input id="f_${k}" value="${esc((v || []).join(', '))}" placeholder="Comma separated">${hint}</div>`;
+    case 'select': return `<div class="field"><label>${label}</label>${selHtml('f_' + k, extra, v || extra[0][0])}</div>`;
+    case 'toggle': return `<label class="check"><input type="checkbox" id="f_${k}" ${v ? 'checked' : ''}> <span><b>${label}</b> <span class="muted small">${esc(extra || '')}</span></span></label>`;
+    case 'checks': return `<div class="field"><label>${label}</label><div class="togs" id="f_${k}">${LIB[extra].map(it => `<span class="tag ${(v || []).includes(it.id) ? 'on' : ''}" data-id="${esc(it.id)}">${esc(it.name || it.title)}</span>`).join('') || '<span class="muted small">None yet</span>'}</div></div>`;
+    case 'textlist': return `<div class="field"><label>${label}</label><div class="textlist" id="f_${k}">${(v || []).map(t => `<div class="item"><textarea rows="3">${esc(t)}</textarea><button class="ghost">✕</button></div>`).join('')}</div><button class="small" id="f_${k}_add">+ Add</button></div>`;
+    default: return `<div class="field"><label>${label}</label><input id="f_${k}" value="${esc(v || '')}">${hint}</div>`;
+  }
+}
+function wireFields(fields) {
+  fields.forEach(([k, , type]) => {
+    if (type === 'checks') $('f_' + k).querySelectorAll('.tag').forEach(t => t.onclick = () => t.classList.toggle('on'));
+    if (type === 'textlist') {
+      const box = $('f_' + k), wire = () => box.querySelectorAll('.item button').forEach(b => b.onclick = () => b.parentElement.remove());
+      wire(); $(`f_${k}_add`).onclick = () => { box.insertAdjacentHTML('beforeend', '<div class="item"><textarea rows="3"></textarea><button class="ghost">✕</button></div>'); wire(); };
+    }
+    if (type === 'image') {
+      $('f_' + k).onchange = async e => { const f = e.target.files[0]; if (!f) return;
+        try { toast('Uploading…'); const data = await resizeImage(f, 640); const r = await post('/api/avatar', {data}); EDIT[k] = r.file; $(`f_${k}_pv`).innerHTML = avatar(r.file, '', 84); toast('Image added'); }
+        catch (err) { toast('⚠ Could not upload image'); } };
+      $(`f_${k}_clr`).onclick = () => { EDIT[k] = ''; $(`f_${k}_pv`).innerHTML = avatar('', EDIT.name || '?', 84); };
+    }
+  });
+}
+function readFields(fields) {
+  fields.forEach(([k, , type]) => {
+    const el = $('f_' + k);
+    if (type === 'image') return;
+    if (type === 'tags') EDIT[k] = el.value.split(',').map(s => s.trim()).filter(Boolean);
+    else if (type === 'toggle') EDIT[k] = el.checked;
+    else if (type === 'checks') EDIT[k] = [...el.querySelectorAll('.tag.on')].map(t => t.dataset.id);
+    else if (type === 'textlist') EDIT[k] = [...el.querySelectorAll('textarea')].map(t => t.value.trim()).filter(Boolean);
+    else EDIT[k] = el.value.trim();
+  });
+}
+function resizeImage(file, max) {
+  return new Promise((res, rej) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => { const s = Math.min(1, max / Math.max(img.width, img.height)); const c = document.createElement('canvas');
+      c.width = Math.round(img.width * s); c.height = Math.round(img.height * s); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg', 0.88)); };
+    img.onerror = rej; img.src = url;
+  });
+}
+
+// ============================================================ import
+$('importFile').onchange = async e => {
+  const files = [...e.target.files]; e.target.value = ''; let last = null, bad = 0;
+  for (const f of files) {
+    try { const buf = new Uint8Array(await f.arrayBuffer()); let bin = ''; for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+      last = await post('/api/import', {name:f.name, data:btoa(bin)}); }
+    catch (err) { bad++; toast('⚠ ' + f.name + ': ' + err.message, 4000); }
+  }
+  await loadLib();
+  if (!last) return;
+  if (last.kind === 'lore') { toast(`📖 Imported ${last.count} lore entr${last.count === 1 ? 'y' : 'ies'}${last.book ? ' into “' + last.book + '”' : ''}`); discoverTag = last.book || ''; return go('#/discover/lore'); }
+  toast(`Imported ${files.length - bad} character${files.length - bad === 1 ? '' : 's'}`); go('#/char/' + last.id);
+};
+
+// ============================================================ start
+(async () => {
+  await Promise.all([loadLib(), loadSettings()]);
+  if (!SET.personaId && LIB.personas[0]) SET.personaId = LIB.personas[0].id;
+  route();
+})();
+</script>
+</body>
+</html>
